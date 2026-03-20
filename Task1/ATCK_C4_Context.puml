@@ -9,9 +9,9 @@ Person(operator, "Оператор")
 Person(vet, "Ветеринар")
 Person(metric_admin, "Администратор метрик")
 
+System(atck, "АвтоТехноСвиноКомплекс")
 System_Ext(analytic, "Аналитический модуль")
 System_Ext(erp, "ERP - система")
-System(atck, "АвтоТехноСвиноКомплекс")
 
 Rel(atck, duty_operator, "Оповещение","","Уведомления о поведении животных")
 Rel(atck, operator, "Получает", "" ,"Задачи на обслуживание")
