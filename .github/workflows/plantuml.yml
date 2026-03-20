@@ -1,4 +1,4 @@
-name: Generate PlantUML Diagrams
+name: PlantUML Diagrams
 
 on:
   push:
@@ -18,25 +18,28 @@ on:
       - Task5
 
 jobs:
-  plantuml:
+  generate-diagrams:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-        with:
-          # Required if the action needs to commit back to the repo
-          fetch-depth: 0 
 
-      - name: Generate SVG Diagrams
-        # This uses a specific, well-maintained action from the marketplace
-        uses: holowinski/plantuml-github-action@main
-        with:
-          # Arguments passed to the PlantUML command line tool
-          args: -tsvg "**/*.puml" 
-          
-      - name: Commit Generated Files
-        # Use an action to automatically commit the new or updated images
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Generate SVG files for PlantUML diagrams"
-          branch: ${{ github.head_ref }} # Commit to the current branch
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install PlantUML
+      run: sudo apt-get install plantuml
+
+    - name: Generate Diagrams
+      run: |
+        plantuml diagrams/context/*.puml
+        plantuml diagrams/container/*.puml
+        plantuml diagrams/component/*.puml
+        plantuml diagrams/code/*.puml
+
+    - name: Commit Diagrams
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add diagrams/**/*.png
+        git commit -m "Automated diagram generation"
+        git push origin main
+      if: success() 
