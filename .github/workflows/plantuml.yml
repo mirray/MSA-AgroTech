@@ -2,8 +2,20 @@ name: Generate PlantUML Diagrams
 
 on:
   push:
-    paths:
-      - "**.puml" # Trigger only when PlantUML files are changed
+    branches:
+      - main
+      - Task1
+      - Task2
+      - Task3
+      - Task4
+      - Task5
+  pull_request:
+    branches:
+      - Task1
+      - Task2
+      - Task3
+      - Task4
+      - Task5
 
 jobs:
   plantuml:
