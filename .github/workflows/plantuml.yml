@@ -30,7 +30,7 @@ jobs:
 
     - name: Generate Diagrams
       run: |
-        plantuml Task1/*.puml
+        plantuml Task1/ATCK_C4_Context_alternative.puml
         plantuml Task2/*.puml
         plantuml Task3/*.puml
         plantuml Task4/*.puml
