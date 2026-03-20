@@ -1,4 +1,3 @@
 @startuml Alternative
 Alice -> Bob
-Bob -> Stan
 @enduml
