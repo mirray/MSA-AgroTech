@@ -1,4 +1,11 @@
-@startuml Alternative
-Alice -> Bob
-Bob -> Chuck
+@startuml ATCK_Alternative
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(duty_operator, "Дежурный оператор")
+Person(technican, "Техник умных систем")
+Person(cv_technican, "Техник видеонаблюдения")
+Person(operator, "Оператор")
+Person(vet, "Ветеринар")
+Person(metric_admin, "Администратор метрик")
+
 @enduml
