@@ -1,28 +1,4 @@
-@startuml Архитектура_АвтоТехноСвиноКомплекс_v1
+@startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
-' === Участники ===
-Person(duty_operator, "Дежурный оператор")
-Person(technican, "Техник умных систем")
-Person(cv_technican, "Техник видеонаблюдения")
-Person(operator, "Оператор")
-Person(vet, "Ветеринар")
-Person(metric_admin, "Администратор метрик")
-
-System_Ext(analytic, "Аналитический модуль")
-System_Ext(erp, "ERP - система")
-
-System(atck, "АвтоТехноСвиноКомплекс")
-
-Rel(atck, duty_operator, "Уведомления о поведении животных")
-Rel(atck, operator, "Задачи на обслуживание умных поилок и кормушек")
-Rel(atck, operator, "Задачи на обслуживание системы фильтрации воды")
-Rel(atck, vet, "Данные о здоровье животных")
-Rel(technican, atck, "данные о новых установленных кормушках и поилках")
-Rel(atck, erp, "данные о поголовье свиней")
-Rel(atck, erp, "заявки на закупку кормов")
-Rel(atck, analytic, "Отправляет метрики")
-Rel(metric_admin, atck, "Управляет метриками")
-Rel(cv_technican, atck, "данные об установленных камерах")
-Rel(atck, cv_technican, "Задачи на обслуживание камер")
 @enduml
