@@ -1,5 +1,5 @@
 @startuml ATCK_Alternative
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include <C4/C4_Context>
 
 Person(duty_operator, "Duty operator")
 
