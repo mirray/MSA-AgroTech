@@ -45,5 +45,4 @@ Rel(c_analytic, erp, "Отправляет заявки на закупку ко
 Rel(metric_admin, c_analytic,"Вносит данные о метриках")
 
 Rel(c_analytic, analytic, "Отправляет данные метрик")
-
 @enduml
