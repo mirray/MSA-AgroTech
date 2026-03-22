@@ -10,12 +10,12 @@ System_Boundary(atck, "АвтоТехноСвиноКомплекс"){
     }
     Container_Boundary(offline, "Offline"){
         Container_Boundary(c_events, "Шлюз данных"){
-            Component(c_events_broker, "Внутренний брокер сообщений","EMQX")
+            Component(c_events_broker, "Внутренний брокер сообщений EMQX")
         }
         Container_Boundary(c_video, "Видеонаблюдение"){
             Person(duty_operator, "Дежурный оператор")
             Component(c_video_camera, "IP-Камеры")
-            Component(c_video_nvr, "NVR с функцией AI", "Место мониторинга")
+            Component(c_video_nvr, "NVR с функцией AI")
             Rel(c_video_camera, c_video_nvr, "Видео (PoE)")
             Rel(c_video_nvr, duty_operator, "Push-Событие: опасное поведение свиней")
             Rel(c_video_nvr, c_events_broker, "SMTP-MQTT bridge")
