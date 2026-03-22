@@ -25,7 +25,6 @@ jobs:
       run: |
         plantuml Task1/*.puml
         plantuml Task2/*.puml
-        plantuml Task3/*.puml
 
     - name: Commit Diagrams
       run: |
