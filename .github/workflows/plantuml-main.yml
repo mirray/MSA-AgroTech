@@ -1,45 +1,37 @@
-name: PlantUML Diagrams
+name: PlantUML Diagrams - main
 
 on:
   push:
     branches:
       - main
-      - Task1
-      - Task2
-      - Task3
-      - Task4
-      - Task5
   pull_request:
     branches:
-      - Task1
-      - Task2
-      - Task3
-      - Task4
-      - Task5
+      - main
 
 jobs:
   generate-diagrams:
     runs-on: ubuntu-latest
+    permissions:
+        contents: write
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
 
     - name: Install PlantUML
       run: sudo apt-get install plantuml
 
     - name: Generate Diagrams
       run: |
-        plantuml diagrams/context/*.puml
-        plantuml diagrams/container/*.puml
-        plantuml diagrams/component/*.puml
-        plantuml diagrams/code/*.puml
+        plantuml Task1/*.puml
+        plantuml Task2/*.puml
+        plantuml Task3/*.puml
 
     - name: Commit Diagrams
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add diagrams/**/*.png
+        git add **/*.png
         git commit -m "Automated diagram generation"
         git push origin main
       if: success() 

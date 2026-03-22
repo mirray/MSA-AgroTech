@@ -1,0 +1,62 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Альтернативное_Решение
+!include <C4/C4_Component>
+
+System_Boundary(atck, "АвтоТехноСвиноКомплекс"){
+    Container_Boundary(c_stuff, "Пользователи на свиноферме"){
+        Person(technican, "Техник умных систем")
+        Person(cv_technican, "Техник видеонаблюдения")
+        Person(operator, "Оператор")
+        Person(vet, "Ветеринар")
+    }
+    Component_Ext(c_events_broker_kafka, "Kafka") 
+    Container_Boundary(offline, "Offline"){
+        Container_Boundary(c_events, "Шлюз данных"){
+            Component(c_events_broker, "Внутренний брокер сообщений","EMQX")
+        }
+        Container_Boundary(c_video, "Видеонаблюдение"){
+            Person(duty_operator, "Дежурный оператор")
+            Component(c_video_camera, "IP-Камеры")
+            Component(c_video_nvr, "NVR с функцией AI", "Место мониторинга")
+            Rel(c_video_camera, c_video_nvr, "Видео (PoE)")
+            Rel(c_video_nvr, duty_operator, "Push-Событие: опасное поведение свиней")
+            Rel(c_video_nvr, c_events_broker, "SMTP-MQTT bridge")
+        }
+        Container_Boundary(c_iot, "Умные устройства"){
+            Component(с_iot_devices, "Датчики","поилки, кормушки, системы фильтрации, RFID-сканеры")
+            Rel(с_iot_devices, c_events_broker, "данные датчиков (mesh network + MQTT)")
+        } 
+        Rel(c_events_broker, c_events_broker_kafka, "Sync: EMQX to Kafka bridge")
+        Component(app, "Мобильное или веб приложение", "Треккинг задач для персонала на ферме")
+        Rel(cv_technican, app, "Использует")
+        Rel(technican, app, "Использует")
+        Rel(operator, app, "Использует")
+        Rel(vet, app, "Использует")
+        Component(api_gateaway, "BFF-Service", "REST")
+        Rel(app, api_gateaway, "Http")
+        Rel(c_events_broker, api_gateaway, "данные о животных и задачи персоналу") 
+    }
+    
+    Container_Boundary(online, "Online"){
+
+        Container_Boundary(c_personal, "Задачи операторам и техникам") {
+            Component(c_presonal_service, "Сервис треккинга задач")
+            Rel(c_events_broker_kafka, c_presonal_service, "Задачи на обслуживание")
+            Rel(c_presonal_service, c_events_broker_kafka, "Результат задач на обслуживание")
+
+            Component(c_iot_analysis, "Сервис поддержки умных устройств")
+            Rel(c_events_broker_kafka, c_iot_analysis, "данные датчиков")
+            Rel(c_iot_analysis, c_events_broker_kafka, "Задачи на обслуживание")
+        }
+         Container_Boundary(c_registry, "Учет животных"){
+            Component(c_registry_identity, "Сервис учета животных")
+            Component(c_registry_health, "Сервис анализа здоровья животных")
+            
+            Rel(c_events_broker_kafka, c_registry_identity, "данные RFID-сканеров")
+            Rel(c_registry_identity, c_events_broker_kafka, "Подсчет животных")
+            Rel(c_events_broker_kafka, c_registry_health, "данные RFID-сканеров")
+            Rel(c_registry_health, c_events_broker_kafka, "Данные о здоровье животных")
+        }
+    }
+}
+
+@enduml

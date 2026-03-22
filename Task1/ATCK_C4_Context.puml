@@ -1,26 +1,22 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1
 !include <C4/C4_Context>
 
-' === Участники ===
+
 Person(duty_operator, "Дежурный оператор")
-Person(technican, "Техник умных систем")
-Person(cv_technican, "Техник видеонаблюдения")
 Person(operator, "Оператор")
+Person(analytic, "Аналитик")
 Person(vet, "Ветеринар")
-Person(metric_admin, "Администратор метрик")
 
 System(atck, "АвтоТехноСвиноКомплекс")
-System_Ext(analytic, "Аналитический модуль")
+
+Rel(atck, duty_operator, "Получает уведомления")
+Rel(atck, operator, "Получает задачи на обслуживание")
+Rel(atck, vet, "Получает данные о животных")
+Rel(analytic, atck, "Управляет метриками")
+
+System_Ext(clickhouse, "ClickHouse")
 System_Ext(erp, "ERP - система")
 
-Rel(atck, duty_operator, "Уведомления о поведении животных")
-Rel(atck, operator, "Получает задачи на обслуживание")
-Rel(atck, vet, "Получает данные о здоровье животных")
-Rel(technican, atck,"Вносит данные о новых установленных кормушках и поилках")
-Rel(atck, analytic, "Отправляетметрики")
-Rel(atck, erp, "Отправляет данные о поголовье свиней")
-Rel(atck, erp, "Отправляет аявки на закупку кормов")
-Rel(metric_admin, atck,"Вносит данные о метриках")
-Rel(cv_technican, atck,"Вносит данные об установленных камерах")
-Rel(atck, cv_technican, "Получает задачи на обслуживание камер")
+Rel(atck, clickhouse, "Отправляет метрики")
+Rel(atck, erp, "Отправляет заявки на закупку кормов")
 @enduml
