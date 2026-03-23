@@ -1,18 +1,24 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Альтернативное_Решение
 !include <C4/C4_Context>
 
+
 Person(duty_operator, "Дежурный оператор")
+Person(operator, "Оператор")
+Person(analytic, "Аналитик")
+Person(vet, "Ветеринар")
 
-System(atck, "АвтоТехноСвиноКомплекс")
+System(atck_agent, "АвтоТехноСвиноКомплекс - Агент")
+System(atck_server, "АвтоТехноСвиноКомплекс - Сервер")
+BiRel(atck_agent, atck_server, "Синхронизирует данные")
 
-Rel(atck, duty_operator, "Получает уведомления")
+Rel(atck_agent, duty_operator, "Получает уведомления")
+Rel(atck_agent, operator, "Получает задачи на обслуживание")
+Rel(atck_agent, vet, "Получает данные о животных")
+Rel(analytic, atck_server, "Управляет метриками")
 
-System_Ext(open_telemetry, "OpenTelemetry")
-System_Ext(api, "API service")
+System_Ext(analytic_module, "Аналитический модуль")
+System_Ext(erp, "ERP - система")
 
-Rel(atck, open_telemetry, "Отправляет метрики")
-Rel(atck, api, "Предоставляет заявки на закупку кормов")
-Rel(atck, api, "Предоставляет задачи на обслуживание")
-Rel(atck, api, "Предоставляет данные о животных")
-Rel(atck, api, "Получает данные о новых метриках")
+Rel(atck_server, analytic_module, "Передает данные метрик")
+Rel(atck_server, erp, "Отправляет заявки на закупку кормов")
 @enduml

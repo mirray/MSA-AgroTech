@@ -7,16 +7,18 @@ Person(operator, "Оператор")
 Person(analytic, "Аналитик")
 Person(vet, "Ветеринар")
 
-System(atck, "АвтоТехноСвиноКомплекс")
+System(atck_agent, "АвтоТехноСвиноКомплекс - Агент")
+System(atck_server, "АвтоТехноСвиноКомплекс - Сервер")
+BiRel(atck_agent, atck_server, "Синхронизирует данные")
 
-Rel(atck, duty_operator, "Получает уведомления")
-Rel(atck, operator, "Получает задачи на обслуживание")
-Rel(atck, vet, "Получает данные о животных")
-Rel(analytic, atck, "Управляет метриками")
+Rel(atck_agent, duty_operator, "Получает уведомления")
+Rel(atck_server, operator, "Получает задачи на обслуживание")
+Rel(atck_server, vet, "Получает данные о животных")
+Rel(analytic, atck_server, "Управляет метриками")
 
-System_Ext(clickhouse, "ClickHouse")
+System_Ext(analytic_module, "Аналитический модуль")
 System_Ext(erp, "ERP - система")
 
-Rel(atck, clickhouse, "Отправляет метрики")
-Rel(atck, erp, "Отправляет заявки на закупку кормов")
+Rel(atck_server, analytic_module, "Передает данные метрик")
+Rel(atck_server, erp, "Отправляет заявки на закупку кормов")
 @enduml
