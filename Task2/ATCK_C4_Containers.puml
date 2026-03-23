@@ -26,7 +26,7 @@ System_Boundary(atck_server, "Сервер"){
     Container(metrics, "Сервис метрик")
     Container(ui, "Мобильное или веб приложение") 
 }
-    Rel(broker, broker_server, "Синхронизирует данные")
+    BiRel(broker, broker_server, "Синхронизирует данные")
     Rel(video, broker, "Публикует события для оповещения")
     Rel(iot, broker, "Передает данные с датчиков")
     Rel(broker, iot, "Передает команды устройствам")

@@ -64,7 +64,7 @@ Rel(ui, broker_server, "Данные от пользователей")
 Rel(broker, ui, "Данные для отображения")
 Rel(ui, broker, "Данные от пользователей")
 
-Rel(broker, broker_server, "Синхронизирует данные")
+BiRel(broker, broker_server, "Синхронизирует данные")
 
 Rel(notification, duty_operator, "Получает уведомления")
 Rel(ui, operator, "Использует: задачи на обслуживание")
