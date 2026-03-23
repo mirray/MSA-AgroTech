@@ -1,0 +1,33 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1
+!include <C4/C4_Container>
+
+Person(duty_operator, "Дежурный оператор")
+Person(operator, "Оператор")
+Person(analytic, "Аналитик")
+Person(vet, "Ветеринар")
+
+System(atck_agent, "Агент")
+System(atck_server, "Сервер")
+System_Ext(analytic_module, "Аналитический модуль")
+System_Ext(erp, "ERP - система")
+
+System_Boundary(atck_agent, "Агент"){
+    Container(video, "Сервис видеоанализа")
+    Container(iot, "Сервис умных устройств")
+    Container(notification, "Сервис оповещения")
+    Container(broker, "Брокер сообщений")
+}
+
+System_Boundary(atck_server, "Сервер"){
+    Container(broker_server, "Брокер сообщений")
+    Container(water, "Сервис управления поилками")
+    Container(food, "Сервис управления кормушками")
+    Container(water_filter, "Сервис управления фильтрами воды")
+    Container(food_supply, "Сервис прогнозирования расхода корма")
+    Container(pigs, "Сервис учета свиней")
+    Container(tasks, "Сервис задач")
+    Container(metrics, "Сервис метрик")
+    Container(ui, "Мобильное или веб приложение") 
+}
+
+@enduml
