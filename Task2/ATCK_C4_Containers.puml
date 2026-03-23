@@ -1,48 +1,73 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1
 !include <C4/C4_Container>
 
-' === Участники ===
 Person(duty_operator, "Дежурный оператор")
-Person(technican, "Техник умных систем")
-Person(cv_technican, "Техник видеонаблюдения")
 Person(operator, "Оператор")
+Person(analytic, "Аналитик")
 Person(vet, "Ветеринар")
-Person(metric_admin, "Администратор метрик")
 
-System(atck, "АвтоТехноСвиноКомплекс")
-System_Ext(analytic, "Аналитический модуль")
+System_Boundary(atck_agent, "АвтоТехноСвиноКомплекс - Агент"){
+    Container(video, "Сервис видеоанализа")
+    Container(iot, "Сервис умных устройств")
+    Container(notification, "Сервис оповещения")
+    Container(broker, "Брокер сообщений")
+    Rel(video, broker, "Публикует события для оповещения")
+    Rel(iot, broker, "Передает данные с датчиков")
+    Rel(broker, iot, "Передает команды устройствам")
+    Rel(broker, notification, "Передает события для оповещения")
+}
+System_Boundary(atck_server, "АвтоТехноСвиноКомплекс - Сервер"){
+    Container(broker_server, "Брокер сообщений")
+    Container(water, "Сервис управления поилками")
+    Container(food, "Сервис управления кормушками")
+    Container(water_filter, "Сервис управления фильтрами воды")
+    Container(food_supply, "Сервис прогнозирования расхода корма")
+    Container(pigs, "Сервис учета свиней")
+    Container(tasks, "Сервис задач")
+    Container(metrics, "Сервис метрик")
+    Container(ui, "Мобильное или веб приложение")
+
+    Rel(broker_server, water, "Данные с датчиков поилок")
+    Rel(water, broker_server, "Команды для поилок")
+    Rel(water, broker_server, "Задачи на обслуживание")
+
+    Rel(broker_server, food, "Данные с датчиков кормушек")
+    Rel(food, broker_server, "Команды для кормушек")
+    Rel(food, broker_server, "Задачи на обслуживание")
+
+    Rel(broker_server, water_filter, "Данные с датчиков фильтров воды")
+    Rel(water_filter, broker_server, "Задачи на обслуживание")
+
+    Rel(broker_server, food_supply, "Данные с датчиков кормушек")
+    Rel(food_supply, broker_server, "Заявки на закупку корма")
+    Rel(food_supply, broker_server, "Данные по расходованию корма")
+
+    Rel(broker_server, pigs, "Данные с RFID-сканеров")
+    Rel(broker_server, pigs, "Данные с поведении")
+    Rel(pigs, broker_server, "Данные о состоянии")
+
+    Rel(broker_server, tasks, "Задачи на обслуживание")
+    Rel(broker_server, tasks, "Результат выполнения задач")
+    Rel(tasks, broker_server, "Распределение задач на обслуживание")
+
+    Rel(broker_server, metrics, "Структурированные данные от сервисов")
+    Rel(broker_server, metrics, "Данные с датчиков")
+    Rel(broker_server, metrics, "Кастомные метрики")
+    Rel(metrics, broker_server, "Расчет метрик")
+
+    Rel(broker_server, ui, "Данные для отображения")
+    Rel(ui, broker_server, "Данные от пользователей")
+}
+Rel(broker, broker_server, "Синхронизирует данные")
+
+Rel(notification, duty_operator, "Получает уведомления")
+Rel(ui, operator, "Использует: задачи на обслуживание")
+Rel(ui, vet, "Использует: данные о животных")
+Rel(analytic, ui, "Использует: метрики")
+
+System_Ext(analytic_module, "Аналитический модуль")
 System_Ext(erp, "ERP - система")
 
-System_Boundary(atck, "АвтоТехноСвиноКомплекс"){
-    Container(c_video, "Видеонаблюдение", "Анализ видео с камер наблюдения")
-    Container(c_iot, "Умные устройства", "Управление и анализ данных с умных устройств")
-    Container(c_events, "Шлюз Событий", "Учет событий происходящих на ферме")
-    Container(c_registry, "Учет животных", "Учет состояния животных")
-    Container(c_analytic, "Внутренняя аналитика", "Анализ текущих показателей фермы и прогнозирование")
-}
-
-Rel(c_video, c_events, "Отправляет события о поведении животных")
-Rel(cv_technican, c_video,"Вносит данные об установленных камерах")
-Rel(c_video, cv_technican, "Получает задачи на обслуживание камер")
-Rel(c_video, duty_operator, "Отсылает уведомление об опасном поведении животных")
-
-Rel(c_iot, c_events, "Отправляет события с датчиков умных устройств")
-Rel(c_iot, operator, "Получает задачи на обслуживание умных устройств")
-
-Rel(technican, c_iot,"Вносит данные о новых установленных умных устройствах")
-Rel(c_iot, technican, "Получает задачи на обслуживание умных устройств")
-
-Rel(operator, c_iot, "Вносит идентификационные данные о животных")
-Rel(c_events, c_registry, "Отправляет данные по событиям с животными")
-
-Rel(c_registry, vet, "Получает данные о здоровье животных")
-Rel(c_registry, erp, "Отправляет данные о поголовье свиней")
-
-Rel(c_events, c_analytic,"Отправляет данные по событиям")
-Rel(c_analytic, erp, "Отправляет заявки на закупку кормов")
-Rel(metric_admin, c_analytic,"Вносит данные о метриках")
-
-Rel(c_analytic, analytic, "Отправляет данные метрик")
-Rel(c_events, analytic, "Отправляет события с фермы")
-
+Rel(metrics, analytic_module, "Передает данные метрик")
+Rel(food_supply, erp, "Отправляет заявки на закупку кормов")
 @enduml
