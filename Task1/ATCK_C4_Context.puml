@@ -1,23 +1,24 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1
 !include <C4/C4_Context>
 
-Person(duty_operator, "Дежурный оператор")
-Person(operator, "Оператор")
-Person(analytic, "Аналитик")
-Person(vet, "Ветеринар")
+Person(duty_operator, "Дежурный оператор", "Находится на свиноферме")
+Person(analytic, "Аналитик", "Может создавать новые метрики, анализирует данные")
+Person(operator, "Оператор", "Обслуживает устройства свинофермы")
+Person(vet, "Ветеринар", "Проверяет состояние свиней")
 
-System(atck_agent, "АвтоТехноСвиноКомплекс-Агент")
-System(atck_server, "АвтоТехноСвиноКомплекс-Сервер")
-Rel(atck_agent, atck_server, "Синхронизирует данные")
+System_Boundary(atck, "АвтоТехноСвиноКомплекс"){
+    System(atck_agent, "АвтоТехноСвиноКомплекс-Агент", "Оффлайн модуль, расположен на свиноферме")
+    System(atck_server, "АвтоТехноСвиноКомплекс-Сервер", "Онлайн модуль")
+    BiRel(atck_agent, atck_server, "Синхронизирует данные")
+}
+System_Ext(analytic_module, "Аналитический модуль")
+System_Ext(erp, "ERP - система")
 
 Rel(atck_agent, duty_operator, "Получает уведомления")
 Rel(atck_server, operator, "Получает задачи на обслуживание")
 Rel(atck_server, vet, "Получает данные о животных")
 Rel(analytic, atck_server, "Управляет метриками")
-
-System_Ext(analytic_module, "Аналитический модуль")
-System_Ext(erp, "ERP - система")
-
 Rel(atck_server, analytic_module, "Передает данные метрик")
 Rel(atck_server, erp, "Отправляет заявки на закупку кормов")
+
 @enduml
