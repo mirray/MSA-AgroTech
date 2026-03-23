@@ -6,17 +6,15 @@ Person(operator, "Оператор")
 Person(analytic, "Аналитик")
 Person(vet, "Ветеринар")
 
-System(atck_agent, "Агент")
 System(atck_server, "Сервер")
 System_Ext(analytic_module, "Аналитический модуль")
 System_Ext(erp, "ERP - система")
 
-System_Boundary(atck_agent, "Агент"){
+System_Boundary(atck_agent, "Агент1"){
     Container(video, "Сервис видеоанализа")
     Container(iot, "Сервис умных устройств")
     Container(notification, "Сервис оповещения")
     Container(broker, "Брокер сообщений")
 }
-
 
 @enduml

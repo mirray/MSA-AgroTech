@@ -18,8 +18,12 @@ jobs:
       - name: Install Graphviz
         run: sudo apt-get install graphviz
       
-      - name: Install PlantUML
-        run: sudo apt-get install plantuml
+      - name: Download specific PlantUML JAR
+        run: |
+          # Define the version and download URL
+          PLANTUML_VERSION="2.13.0" # Check the latest version on the PlantUML releases page
+          JAR_URL="https://github.com{PLANTUML_VERSION}/plantuml-${PLANTUML_VERSION}.jar"
+          curl -L $JAR_URL -o plantuml.jar
 
       - name: Get all changes files
         id: get-changed-files
@@ -36,7 +40,7 @@ jobs:
               # add puml file
               puml_files="${puml_files} ${changed_file}"
               echo "Added file: ${changed_file}"
-              plantuml ${changed_file}
+              java -jar plantuml.jar -tsvg ${changed_file}
             fi
           done
           echo "puml-files=${puml_files}" >> $GITHUB_OUTPUT  
