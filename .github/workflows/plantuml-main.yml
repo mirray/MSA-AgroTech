@@ -44,6 +44,7 @@ jobs:
         id: get-generated-images
         run: |
           for puml_file in ${{ steps.get-changed-files.outputs.puml-files }}; do
+            echo "Added file: ${puml_file}"  
             plantuml ${puml_file}"
           done
 
