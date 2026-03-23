@@ -9,7 +9,7 @@ Person(vet, "Ветеринар")
 
 System(atck_agent, "АвтоТехноСвиноКомплекс - Агент")
 System(atck_server, "АвтоТехноСвиноКомплекс - Сервер")
-BiRel(atck_agent, atck_server, "Синхронизирует данные")
+Rel(atck_agent, atck_server, "Синхронизирует данные")
 
 Rel(atck_agent, duty_operator, "Получает уведомления")
 Rel(atck_server, operator, "Получает задачи на обслуживание")
