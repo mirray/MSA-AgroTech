@@ -1,4 +1,4 @@
-@startuml Архитектура_АвтоТехноСвиноКомплекс_v1
+@startuml Architecture_C4_Containers
 !include <C4/C4_Container>
 
 Person(duty_operator, "Дежурный оператор")
