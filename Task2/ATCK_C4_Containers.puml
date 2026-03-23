@@ -1,6 +1,5 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1
 !include <C4/C4_Container>
-
 Person(duty_operator, "Дежурный оператор")
 Person(operator, "Оператор")
 Person(analytic, "Аналитик")
