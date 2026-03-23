@@ -6,8 +6,8 @@ Person(operator, "Оператор")
 Person(analytic, "Аналитик")
 Person(vet, "Ветеринар")
 
-System(atck_agent, "АвтоТехноСвиноКомплекс - Агент")
-System(atck_server, "АвтоТехноСвиноКомплекс - Сервер")
+System(atck_agent, "АвтоТехноСвиноКомплекс-Агент")
+System(atck_server, "АвтоТехноСвиноКомплекс-Сервер")
 Rel(atck_agent, atck_server, "Синхронизирует данные")
 
 Rel(atck_agent, duty_operator, "Получает уведомления")
