@@ -15,6 +15,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Install Graphviz
+        run: sudo apt-get install graphviz
+      
       - name: Install PlantUML
         run: sudo apt-get install plantuml
 
@@ -36,37 +39,13 @@ jobs:
             fi
           done
           echo "puml-files=${puml_files}" >> $GITHUB_OUTPUT  
-      - name: Generate Diagrams
-        run: |
-          plantuml Task1/*.puml
-          plantuml Task2/*.puml
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
-      - name: Get all changes files
-        id: get-changed-files
-        uses: jitterbit/get-changed-files@v1
-      - name: Get changed UML files
-        id: get-changed-uml-files
-        run: |
-          puml_files=''
-          for changed_file in ${{ steps.get-changed-files.outputs.modified }}; do
-            extension="${changed_file##*.}"
-
-            if [ "${extension}" == "puml" ]; then
-              # add puml file
-              puml_files="${puml_files} ${changed_file}"
-              echo "Added file: ${changed_file}"
-            fi
-          done
-          echo "puml-files=${puml_files}" >> $GITHUB_OUTPUT
       - name: Generate SVG Diagrams
         id: get-generated-images
         run: |
           for puml_file in ${{ steps.get-changed-files.outputs.puml-files }}; do
             plantuml ${puml_file}"
+
       - name: Commit Diagrams
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
