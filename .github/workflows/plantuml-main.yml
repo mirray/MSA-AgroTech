@@ -20,9 +20,7 @@ jobs:
       
       - name: Download specific PlantUML JAR
         run: |
-          # Define the version and download URL
-          PLANTUML_VERSION="2.13.0" # Check the latest version on the PlantUML releases page
-          JAR_URL="https://github.com{PLANTUML_VERSION}/plantuml-${PLANTUML_VERSION}.jar"
+          JAR_URL="https://github.com/plantuml/plantuml/releases/download/v1.2026.2/plantuml-mit-1.2026.2.jar"
           curl -L $JAR_URL -o plantuml.jar
 
       - name: Get all changes files

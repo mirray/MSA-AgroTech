@@ -6,7 +6,7 @@ Person(operator, "Оператор")
 Person(analytic, "Аналитик")
 Person(vet, "Ветеринар")
 
-System(atck_server, "Сервер")
+System(atck_server, "Сервер1")
 System_Ext(analytic_module, "Аналитический модуль")
 System_Ext(erp, "ERP - система")
 
