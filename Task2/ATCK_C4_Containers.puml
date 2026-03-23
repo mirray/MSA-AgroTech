@@ -6,6 +6,7 @@ Person(operator, "Оператор")
 Person(analytic, "Аналитик")
 Person(vet, "Ветеринар")
 
+
 System_Boundary(atck_agent, "АвтоТехноСвиноКомплекс - Агент") {
     Container(video, "Сервис видеоанализа")
     Container(iot, "Сервис умных устройств")

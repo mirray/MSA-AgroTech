@@ -5,6 +5,7 @@ Person(duty_operator, "Дежурный оператор")
 Person(operator, "Оператор")
 Person(analytic, "Аналитик")
 Person(vet, "Ветеринар")
+
 Container(ui, "Мобильное или веб приложение")
 
 System_Boundary(atck_agent, "АвтоТехноСвиноКомплекс - Агент") {
