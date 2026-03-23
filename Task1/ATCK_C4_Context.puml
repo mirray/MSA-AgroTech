@@ -1,6 +1,5 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1
-!include <C4/C4_Context>
-
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
 Person(duty_operator, "Дежурный оператор")
 Person(operator, "Оператор")
