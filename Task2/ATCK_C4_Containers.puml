@@ -8,6 +8,8 @@ Person(vet, "Ветеринар")
 
 System_Ext(analytic_module, "Аналитический модуль")
 System_Ext(erp, "ERP - система")
+System(atck_agent, "АвтоТехноСвиноКомплекс-Агент")
+System(atck_server, "АвтоТехноСвиноКомплекс-Сервер")
 
 System_Boundary(atck_agent, "АвтоТехноСвиноКомплекс-Агент") {
     Container(video, "Сервис видеоанализа")
@@ -20,6 +22,7 @@ System_Boundary(atck_agent, "АвтоТехноСвиноКомплекс-Аге
     Rel(broker, notification, "Передает события для оповещения")
     Rel(notification, duty_operator, "Получает уведомления")
 }
+
 System_Boundary(atck_server, "АвтоТехноСвиноКомплекс-Сервер"){
     Container(broker_server, "Брокер сообщений")
     Container(water, "Сервис управления поилками")
