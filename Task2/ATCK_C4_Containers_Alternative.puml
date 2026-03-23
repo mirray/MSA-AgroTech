@@ -8,21 +8,24 @@ Person(vet, "Ветеринар")
 Container(ui, "Мобильное или веб приложение")
 
 System_Boundary(atck_agent, "АвтоТехноСвиноКомплекс - Агент") {
-    Container(video, "Сервис видеоанализа")
-    Container(iot, "Сервис умных устройств")
-    Container(notification, "Сервис оповещения")
-    Container(broker, "Брокер сообщений")
+    Container(video, "Сервис видеоанализа", "Анализирует поведение свиней на видео")
+    Container(iot, "Сервис умных устройств", "Управляет автоматическими устройствами на свиноферме")
+    Container(notification, "Сервис оповещения", "Быстрое оповещение сотрудников в оффлайн режиме")
+    ContainerQueue(broker, "Брокер сообщений", "Передает сообщения внутри агента, синхронизирйет с сервером")
     Rel(video, broker, "Публикует события для оповещения")
     Rel(iot, broker, "Передает данные с датчиков")
     Rel(broker, iot, "Передает команды устройствам")
     Rel(broker, notification, "Передает события для оповещения")
 
-    Container(water, "Сервис управления поилками")
-    Container(food, "Сервис управления кормушками")
-    Container(water_filter, "Сервис управления фильтрами воды")
+    Boundary(b_iot,"IoT - сервисы"){
+        Container(water, "Сервис управления поилками")
+        Container(food, "Сервис управления кормушками")
+        Container(water_filter, "Сервис управления фильтрами воды")
+        Container(pigs, "Сервис учета свиней")        
+    }
+
     Container(food_supply, "Сервис прогнозирования расхода корма")
-    Container(pigs, "Сервис учета свиней")
-    Container(tasks, "Сервис задач")
+    Container(tasks, "Сервис задач", "Задачи на обслуживание для сотрудников фермы")
 
     Rel(broker, water, "Данные с датчиков поилок")
     Rel(water, broker, "Команды для поилок")
@@ -48,15 +51,13 @@ System_Boundary(atck_agent, "АвтоТехноСвиноКомплекс - Аг
     Rel(tasks, broker, "Распределение задач на обслуживание")    
 }
 System_Boundary(atck_server, "АвтоТехноСвиноКомплекс - Сервер"){
-    Container(broker_server, "Брокер сообщений")
+    ContainerQueue(broker_server, "Брокер сообщений")
     Container(metrics, "Сервис метрик")
-   
-    
+
     Rel(broker_server, metrics, "Структурированные данные от сервисов")
     Rel(broker_server, metrics, "Данные с датчиков")
     Rel(broker_server, metrics, "Кастомные метрики")
     Rel(metrics, broker_server, "Расчет метрик")
-
 }
 
 Rel(broker_server, ui, "Данные для отображения")
