@@ -27,7 +27,7 @@ jobs:
         id: get-changed-files
         uses: jitterbit/get-changed-files@v1
       
-      - name: Get changed UML files and generate SVG Diagrams
+      - name: Get changed UML files and generate PNG Diagrams
         id: get-changed-uml-files
         run: |
           puml_files=''
@@ -38,7 +38,7 @@ jobs:
               # add puml file
               puml_files="${puml_files} ${changed_file}"
               echo "Added file: ${changed_file}"
-              java -jar plantuml.jar -tsvg ${changed_file}
+              java -jar plantuml.jar -tpng ${changed_file}
             fi
           done
           echo "puml-files=${puml_files}" >> $GITHUB_OUTPUT  
