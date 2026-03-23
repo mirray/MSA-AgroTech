@@ -18,16 +18,5 @@ System_Boundary(atck_agent, "Агент"){
     Container(broker, "Брокер сообщений")
 }
 
-System_Boundary(atck_server, "Сервер"){
-    Container(broker_server, "Брокер сообщений")
-    Container(water, "Сервис управления поилками")
-    Container(food, "Сервис управления кормушками")
-    Container(water_filter, "Сервис управления фильтрами воды")
-    Container(food_supply, "Сервис прогнозирования расхода корма")
-    Container(pigs, "Сервис учета свиней")
-    Container(tasks, "Сервис задач")
-    Container(metrics, "Сервис метрик")
-    Container(ui, "Мобильное или веб приложение") 
-}
 
 @enduml
