@@ -3,7 +3,7 @@
 Person(duty_operator, "Duty Operator")
 
 System_Boundary(atck_agent, "Agent"){
-    Container(broker, "MQTT broker", "EMQX")
+    ContainerQueue(broker, "MQTT broker", "EMQX")
     Container_Boundary(video, "Video analysis"){
         Component(ip_cameras, "IP-Cameras")
         Component(ai, "Edge Device for video analysis", "OpenCV")
@@ -24,7 +24,7 @@ System_Boundary(atck_agent, "Agent"){
     
 }
 System_Boundary(atck_server, "Server"){
-    ContainerQueue(message_queue, "ActiveMQ")
+    ContainerQueue(event_broker, "Kafka")
     Boundary(data_layer, "IoT Data Layer"){
         ContainerQueue(broker_server, "MQTT broker", "EMQX")
         BiRel(broker, broker_server, "sync data", "MQTT bridge")
@@ -40,7 +40,7 @@ System_Boundary(atck_server, "Server"){
             ComponentDb(eventlog_iot, "Event Log", "PostgresQL")
             Rel(iot_service, data_aggregated, "request data", "psql")
             Rel(iot_service, broker_server, "commands for IoT device", "MQTT")
-            Rel(iot_service, message_queue, "tasks for people", "JSON")
+            Rel(iot_service, event_broker, "tasks for people", "JSON")
             Rel(iot_service, eventlog_iot, "Stores data in Event Log", "psql")
         }
     }
@@ -50,23 +50,23 @@ System_Boundary(atck_server, "Server"){
             Component(prediction_service, "Service: Analyse historical data")
             ComponentDb(eventlog_prediction, "Event Log + historical data storage", "PostgresQL")
             Rel(prediction_service, data_aggregated, "request data", "psql")
-            Rel(prediction_service, message_queue, "commands for erp (buy food for pigs)", "JSON")
+            Rel(prediction_service, event_broker, "commands for erp (buy food for pigs)", "JSON")
             Rel(prediction_service, eventlog_prediction, "Stores data", "psql")
         }
     Container_Boundary(pigs, "Pigs management"){
             Component(pigs_service, "Service: pigs health analysis & counter")
             ComponentDb(eventlog_pigs, "Event Log + historical data storage", "PostgresQL")
             Rel(pigs_service, data_aggregated, "request data", "psql")
-            Rel(pigs_service, message_queue, "pigs data", "JSON")
+            Rel(pigs_service, event_broker, "pigs data", "JSON")
             Rel(pigs_service, eventlog_pigs, "Stores data", "psql")
         }
     Container_Boundary(tasks, "Tasks management"){
             Component(tasks_service, "Service: task management", "Spread tasks across people")
             ComponentDb(eventlog_tasks, "Event Log + People data local storage", "PostgresQL")
-            Rel(message_queue, tasks_service, "get commands for people", "JSON")
-            Rel(message_queue, tasks_service, "get results of command executions", "JSON")
-            Rel(message_queue, tasks_service, "get people data (ERP)", "JSON")
-            Rel(tasks_service, message_queue, "send personificated commands", "JSON")
+            Rel(event_broker, tasks_service, "get commands for people", "JSON")
+            Rel(event_broker, tasks_service, "get results of command executions", "JSON")
+            Rel(event_broker, tasks_service, "get people data (ERP)", "JSON")
+            Rel(tasks_service, event_broker, "send personificated commands", "JSON")
             Rel(tasks_service, eventlog_tasks, "Stores data", "psql")
         }
     Container_Boundary(erp_sync, "ERP Sync gate"){
@@ -74,7 +74,7 @@ System_Boundary(atck_server, "Server"){
             Component(erp_sync_service, "Sync service for ERP", "send/receive data from ERP")
             ComponentDb(eventlog_erp_sync, "Event Log + local storage", "PostgresQL")
             Rel(erp_sync_service, eventlog_erp_sync, "Stores data", "psql")
-            BiRel(erp_sync_service, message_queue, "send ERP-data", "JSON")
+            BiRel(erp_sync_service, event_broker, "send ERP-data", "JSON")
             BiRel(erp, erp_sync_service, "Sync data", "Rest Api")
         }
     }
@@ -110,12 +110,12 @@ System_Boundary(atck_server, "Server"){
         Component(api_gateaway, "API Gateaway: Provides data for app", "REST Api + SSE (for notifications)")
         ComponentDb(eventlog_api_gateaway, "Event Log + local storage", "PostgresQL")
         BiRel(bff_service, eventlog_api_gateaway, "store/read data", "psql")
-        BiRel(bff_service, message_queue, "send/receive commands", "JSON")
+        BiRel(bff_service, event_broker, "send/receive commands", "JSON")
         BiRel(bff_service, metrics_service, "get metrics data and manage metrics")
         BiRel(api_gateaway, bff_service, "send/receive data")
         BiRel(api_gateaway, app, "send data", "SSE")
         Rel(api_gateaway, app, "receive data", "Rest API")
     }
 }
-Lay_D(message_queue, internal_services)
+Lay_D(event_broker, internal_services)
 @enduml

@@ -1,80 +1,83 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Альтернативное_Решение
 !include <C4/C4_Container>
-Person(duty_operator, "Дежурный оператор")
-Person(operator, "Оператор")
-Person(analytic, "Аналитик")
-Person(vet, "Ветеринар")
 
-Container(ui, "Мобильное или веб приложение")
 
-System_Boundary(atck_agent, "АвтоТехноСвиноКомплекс - Агент") {
-    Container(video, "Сервис видеоанализа", "Анализирует поведение свиней на видео")
-    Container(iot, "Сервис умных устройств", "Управляет автоматическими устройствами на свиноферме")
-    Container(notification, "Сервис оповещения", "Быстрое оповещение сотрудников в оффлайн режиме")
-    ContainerQueue(broker, "Брокер сообщений", "Передает сообщения внутри агента, синхронизирйет с сервером")
-    Rel(video, broker, "Публикует события для оповещения")
-    Rel(iot, broker, "Передает данные с датчиков")
-    Rel(broker, iot, "Передает команды устройствам")
-    Rel(broker, notification, "Передает события для оповещения")
-
-    Boundary(b_iot,"IoT - сервисы"){
-        Container(water, "Сервис управления поилками")
-        Container(food, "Сервис управления кормушками")
-        Container(water_filter, "Сервис управления фильтрами воды")
-        Container(pigs, "Сервис учета свиней")        
+System_Boundary(atck_agent, "Agent"){
+    ContainerQueue(broker, "Message broker")
+    Boundary(b_video, "Video"){
+        Container(video, "Video analysis")
+        Container(notification, "Notifications")
+        Rel(video, broker, "send events")
+        Rel(video, notification, "send notification")
+        Person(duty_operator, "Duty Operator")
+        Rel(notification, duty_operator, "Recieves notification")
     }
+    Lay_L(broker, b_video)
+    Container(iot, "IOT data collecting")
+    Rel(iot, broker, "sensors data")
+    Rel(iot, broker, "RFID data")
 
-    Container(food_supply, "Сервис прогнозирования расхода корма")
-    Container(tasks, "Сервис задач", "Задачи на обслуживание для сотрудников фермы")
+    ContainerQueue(event_broker, "Event broker")
+    
+    Container(data, "Data Lake")
+    Rel(broker, data, "raw data from Iot sensors")
 
-    Rel(broker, water, "Данные с датчиков поилок")
-    Rel(water, broker, "Команды для поилок")
-    Rel(water, broker, "Задачи на обслуживание")
-
-    Rel(broker, food, "Данные с датчиков кормушек")
-    Rel(food, broker, "Команды для кормушек")
-    Rel(food, broker, "Задачи на обслуживание")
-
-    Rel(broker, water_filter, "Данные с датчиков фильтров воды")
-    Rel(water_filter, broker, "Задачи на обслуживание")
-
-    Rel(broker, food_supply, "Данные с датчиков кормушек")
-    Rel(food_supply, broker, "Заявки на закупку корма")
-    Rel(food_supply, broker, "Данные по расходованию корма")
-
-    Rel(broker, pigs, "Данные с RFID-сканеров")
-    Rel(broker, pigs, "Данные с поведении")
-    Rel(pigs, broker, "Данные о состоянии")
-
-    Rel(broker, tasks, "Задачи на обслуживание")
-    Rel(broker, tasks, "Результат выполнения задач")
-    Rel(tasks, broker, "Распределение задач на обслуживание")    
+    Container(iot_management, "Manage IoT devices")
+    Rel(iot_management, data, "request data")
+    Rel(iot_management, broker, "commands for IoT device")
+    Rel(iot_management, event_broker, "tasks for people")  
+    
+    Container(prediction, "Prediction data service")
+    Rel(prediction, data, "request data")
+    Rel(prediction, event_broker, "commands for erp (buy food for pigs)")
+            
+    Container(pigs, "Pigs management")
+    Rel(pigs, data, "request data")
+    Rel(pigs, event_broker, "pigs data")
+        
+    Container(tasks, "Tasks management")
+    Rel(event_broker, tasks, "get commands for people")
+    Rel(event_broker, tasks, "get results of command executions")
+    Rel(event_broker, tasks, "get people data (ERP)")
+    Rel(tasks, event_broker, "send personificated commands")
+    Boundary(b_ui, "UI"){
+        Container(ui, "Offline Mobile or Web application")
+        Boundary(users, "Users"){
+            Person(operator, "Operator")
+            Person(vet, "Vet")
+        }
+    }
+    Rel(ui, operator, "Uses: tasks")
+    Rel(ui, vet, "Uses: health data for pigs")
+    BiRel(ui, event_broker, "send/receive commands")
+    
+    Boundary(b_erp, "Erp Sync"){
+        System_Ext(erp, "ERP - system")
+        Container(erp_sync, "ERP Sync gate")
+        BiRel(erp_sync, event_broker, "send ERP-data")
+        BiRel(erp, erp_sync, "Sync data")
+    }
 }
-System_Boundary(atck_server, "АвтоТехноСвиноКомплекс - Сервер"){
-    ContainerQueue(broker_server, "Брокер сообщений")
-    Container(metrics, "Сервис метрик")
 
-    Rel(broker_server, metrics, "Структурированные данные от сервисов")
-    Rel(broker_server, metrics, "Данные с датчиков")
-    Rel(broker_server, metrics, "Кастомные метрики")
-    Rel(metrics, broker_server, "Расчет метрик")
+System_Boundary(atck_server, "Server"){
+    Container(data_server, "Data Lake (on server)")
+    BiRel(data, data_server, "sync data")
+
+    System_Ext(analytic_module, "Analytic Module")
+    
+    Container(analytic_module_sync, "Analytic Sync gate")
+    Rel(data_server, analytic_module_sync, "send metrics data")
+    Rel(analytic_module_sync, analytic_module ,"send metrics data")
+    
+    Container(metrics, "Manage metrics")
+    Rel(metrics, data_server, "create new metrics")
+    Rel(data_server, metrics, "request metrics data")
+
+    Container(ui_online, "Online Mobile or Web application")
+    Person(analytic, "Analytic")
+    Rel(analytic, ui_online, "Uses: metrics")
+    BiRel(ui_online, metrics, "get metrics data and manage metrics")
+    
 }
-
-Rel(broker_server, ui, "Данные для отображения")
-Rel(ui, broker_server, "Данные от пользователей")
-Rel(broker, ui, "Данные для отображения")
-Rel(ui, broker, "Данные от пользователей")
-
-BiRel(broker, broker_server, "Синхронизирует данные")
-
-Rel(notification, duty_operator, "Получает уведомления")
-Rel(ui, operator, "Использует: задачи на обслуживание")
-Rel(ui, vet, "Использует: данные о животных")
-Rel(analytic, ui, "Использует: метрики")
-
-System_Ext(analytic_module, "Аналитический модуль")
-System_Ext(erp, "ERP - система")
-
-Rel(metrics, analytic_module, "Передает данные метрик")
-Rel(food_supply, erp, "Отправляет заявки на закупку кормов")
+Lay_D(event_broker, internal_services)
 @enduml
