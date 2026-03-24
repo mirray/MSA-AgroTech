@@ -1,62 +1,123 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Альтернативное_Решение
 !include <C4/C4_Component>
 
-System_Boundary(atck, "АвтоТехноСвиноКомплекс"){
-    Container_Boundary(c_stuff, "Пользователи на свиноферме"){
-        Person(technican, "Техник умных систем")
-        Person(cv_technican, "Техник видеонаблюдения")
-        Person(operator, "Оператор")
-        Person(vet, "Ветеринар")
+System_Boundary(atck_agent, "Agent"){
+    ContainerQueue(broker, "MQTT broker", "EMQX")
+    Boundary(b_video, "Video"){
+        Container_Boundary(video, "Video analysis"){
+            Component(ip_cameras, "IP-Cameras")
+            Component(ai, "Edge Device for video analysis", "OpenCV")
+            Rel(ip_cameras, ai, "video stream", "RTSP")
+            Rel(ai, broker, "send events", "MQTT")
+        }
+        Person(duty_operator, "Duty Operator")
+        Container_Boundary(notification, "Notifications"){
+            Component(notification_service, "Notification Service")
+            Rel(ai, notification_service, "send notification")
+            Rel(notification_service, duty_operator, "Recieves notification")
+        }
     }
-    Component_Ext(c_events_broker_kafka, "Kafka") 
-    Container_Boundary(offline, "Offline"){
-        Container_Boundary(c_events, "Шлюз данных"){
-            Component(c_events_broker, "Внутренний брокер сообщений","EMQX")
+    Lay_L(broker, b_video)
+    Container_Boundary(iot, "IOT data collecting"){
+        Component(iot_devices, "IoT sensors")
+        Component(rfid_scanners, "RFID-scaners")
+        Rel(iot_devices, broker, "sensors data", "MQTT")
+        Rel(rfid_scanners, broker, "RFID data", "MQTT")
+    } 
+
+    ContainerQueue(event_broker, "Event broker", "Kafka")
+    
+    Container_Boundary(data, "Data Lake" ){
+            ComponentDb(data_iot, "Data from IoT sensors", "TimescaleDB")
+            Component(data_aggregated, "Manage aggregated data", "Python")
+            Rel(broker, data_iot, "raw data from Iot sensors", "MQTT")
+            Rel(data_aggregated, data_iot, "manage aggregated views", "Psql")
+            Rel(data_iot, data_aggregated, "request aggregated data", "Psql")
         }
-        Container_Boundary(c_video, "Видеонаблюдение"){
-            Person(duty_operator, "Дежурный оператор")
-            Component(c_video_camera, "IP-Камеры")
-            Component(c_video_nvr, "NVR с функцией AI", "Место мониторинга")
-            Rel(c_video_camera, c_video_nvr, "Видео (PoE)")
-            Rel(c_video_nvr, duty_operator, "Push-Событие: опасное поведение свиней")
-            Rel(c_video_nvr, c_events_broker, "SMTP-MQTT bridge")
-        }
-        Container_Boundary(c_iot, "Умные устройства"){
-            Component(с_iot_devices, "Датчики","поилки, кормушки, системы фильтрации, RFID-сканеры")
-            Rel(с_iot_devices, c_events_broker, "данные датчиков (mesh network + MQTT)")
+
+    Container_Boundary(iot_management, "Manage IoT devices"){
+            Component(iot_service, "Service: Analyse data from Iot sensors")
+            ComponentDb(eventlog_iot, "Event Log", "PostgresQL")
+            Rel(iot_service, data_aggregated, "request data", "psql")
+            Rel(iot_service, broker, "commands for IoT device", "MQTT")
+            Rel(iot_service, event_broker, "tasks for people", "JSON")
+            Rel(iot_service, eventlog_iot, "Stores data in Event Log", "psql")
         } 
-        Rel(c_events_broker, c_events_broker_kafka, "Sync: EMQX to Kafka bridge")
-        Component(app, "Мобильное или веб приложение", "Треккинг задач для персонала на ферме")
-        Rel(cv_technican, app, "Использует")
-        Rel(technican, app, "Использует")
-        Rel(operator, app, "Использует")
-        Rel(vet, app, "Использует")
-        Component(api_gateaway, "BFF-Service", "REST")
-        Rel(app, api_gateaway, "Http")
-        Rel(c_events_broker, api_gateaway, "данные о животных и задачи персоналу") 
+    
+    Container_Boundary(prediction, "Prediction data service"){
+            Component(prediction_service, "Service: Analyse historical data")
+            ComponentDb(eventlog_prediction, "Event Log + historical data storage", "PostgresQL")
+            Rel(prediction_service, data_aggregated, "request data", "psql")
+            Rel(prediction_service, event_broker, "commands for erp (buy food for pigs)", "JSON")
+            Rel(prediction_service, eventlog_prediction, "Stores data", "psql")
+        }        
+    Container_Boundary(pigs, "Pigs management"){
+            Component(pigs_service, "Service: pigs health analysis & counter")
+            ComponentDb(eventlog_pigs, "Event Log + historical data storage", "PostgresQL")
+            Rel(pigs_service, data_aggregated, "request data", "psql")
+            Rel(pigs_service, event_broker, "pigs data", "JSON")
+            Rel(pigs_service, eventlog_pigs, "Stores data", "psql")
+        }
+        
+    Container_Boundary(tasks, "Tasks management"){
+            Component(tasks_service, "Service: task management", "Spread tasks across people")
+            ComponentDb(eventlog_tasks, "Event Log + People data local storage", "PostgresQL")
+            Rel(event_broker, tasks_service, "get commands for people", "JSON")
+            Rel(event_broker, tasks_service, "get results of command executions", "JSON")
+            Rel(event_broker, tasks_service, "get people data (ERP)", "JSON")
+            Rel(tasks_service, event_broker, "send personificated commands", "JSON")
+            Rel(tasks_service, eventlog_tasks, "Stores data", "psql")
+        }
+    Boundary(b_ui, "UI"){
+        Boundary(users, "Users"){
+            Person(operator, "Operator")
+            Person(vet, "Vet")
+        }
+        Component(app, "Mobile or Web application")
+        Rel(app, operator, "Uses: tasks")
+        Rel(app, vet, "Uses: health data for pigs")
+        Component(bff_service, "Back for front service", "ETL")
+        Component(api_gateaway, "API Gateaway: Provides data for app", "REST Api + SSE (for notifications)")
+        ComponentDb(eventlog_api_gateaway, "Event Log + local storage", "PostgresQL")
+        BiRel(bff_service, eventlog_api_gateaway, "store/read data", "psql")
+        BiRel(bff_service, event_broker, "send/receive commands", "JSON")
+        BiRel(api_gateaway, bff_service, "send/receive data")
+        BiRel(api_gateaway, app, "send data", "SSE")
+        Rel(api_gateaway, app, "receive data", "Rest API")
     }
     
-    Container_Boundary(online, "Online"){
-
-        Container_Boundary(c_personal, "Задачи операторам и техникам") {
-            Component(c_presonal_service, "Сервис треккинга задач")
-            Rel(c_events_broker_kafka, c_presonal_service, "Задачи на обслуживание")
-            Rel(c_presonal_service, c_events_broker_kafka, "Результат задач на обслуживание")
-
-            Component(c_iot_analysis, "Сервис поддержки умных устройств")
-            Rel(c_events_broker_kafka, c_iot_analysis, "данные датчиков")
-            Rel(c_iot_analysis, c_events_broker_kafka, "Задачи на обслуживание")
+    Container_Boundary(erp_sync, "ERP Sync gate"){
+            System_Ext(erp, "ERP - system")
+            Component(erp_sync_service, "Sync service for ERP", "send/receive data from ERP")
+            ComponentDb(eventlog_erp_sync, "Event Log + local storage", "PostgresQL")
+            Rel(erp_sync_service, eventlog_erp_sync, "Stores data", "psql")
+            BiRel(erp_sync_service, event_broker, "send ERP-data", "JSON")
+            BiRel(erp, erp_sync_service, "Sync data", "Rest Api")
         }
-         Container_Boundary(c_registry, "Учет животных"){
-            Component(c_registry_identity, "Сервис учета животных")
-            Component(c_registry_health, "Сервис анализа здоровья животных")
-            
-            Rel(c_events_broker_kafka, c_registry_identity, "данные RFID-сканеров")
-            Rel(c_registry_identity, c_events_broker_kafka, "Подсчет животных")
-            Rel(c_events_broker_kafka, c_registry_health, "данные RFID-сканеров")
-            Rel(c_registry_health, c_events_broker_kafka, "Данные о здоровье животных")
+}
+
+System_Boundary(atck_server, "Server"){
+
+    System_Ext(analytic_module, "Analytic Module")
+    
+    Container_Boundary(analytic_module_sync, "Analytic Sync gate"){
+            System_Ext(analytic_module, "Analytic Module")
+            Component(analytic_module_sync_service, "Sync service for Analytic Module", "send/receive metrics data")
+            ComponentDb(eventlog_analytic_module_sync, "Event Log + local storage", "PostgresQL")
+            Rel(analytic_module_sync_service, eventlog_analytic_module_sync, "Stores data", "psql")
+            Rel(data_aggregated, analytic_module_sync_service, "send metrics data")
+            Rel(analytic_module_sync_service, analytic_module ,"send metrics data")
         }
+    Container_Boundary(metrics, "Manage metrics"){
+        Component(metrics_service, "Service for manage metrics")
+        Rel(metrics_service, data_aggregated, "create new metrics", "Psql")
+        Rel(data_aggregated, metrics_service, "request metrics data", "Psql")
     }
+    Container(ui_online, "Online Mobile or Web application")
+    Person(analytic, "Analytic")
+    Rel(analytic, ui_online, "Uses: metrics")
+    BiRel(ui_online, metrics_service, "get metrics data and manage metrics")
+    
 }
 
 @enduml
