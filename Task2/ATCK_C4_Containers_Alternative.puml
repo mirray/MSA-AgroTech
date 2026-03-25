@@ -26,47 +26,34 @@ System_Boundary(atck_agent, "Agent "){
         System_Ext(erp, "ERP - system")
         BiRel(erp, erp_sync, "sync data")
         ContainerQueue(events_hub, "Events Hub", "Store structured data, communicate between services")
-    
     }
     Rel(internal_services, data_hub, "raw data")
-   
     Container(api_local, "Local API - Gateaway")
     BiRel(events_hub, api_local, "uses")
-    
 }
 
 System_Boundary(atck_server, "Server"){
-    ContainerQueue(events_hub_server, "Structured Data Storage", "Collects structured data from agents")
-    BiRel(events_hub, events_hub_server, "sync data")
-   
-    
     Boundary(analysis_internal, "Internal Analytic Services"){
         Container(metrics_management, "Metrics management", "Create, modify, remove metrics")
         Container(analytic_module_sync, "Analytic Sync gate", "Send metrics data to external analytics module")   
         System_Ext(analytic_module, "Analytic Module") 
         Rel(analytic_module_sync, analytic_module ,"send metrics")
         ContainerDb(analytic_db, "Analytic data storage")
+        Person(analytic, "Analytic")
+        BiRel(metrics_management, analytic, "Uses: metrics")
     }
     ContainerDb(data_hub_server, "Raw Data storage", "Collects raw data from agents")
     Rel(data_hub, data_hub_server ,"send raw data")
     Rel(data_hub_server, analysis_internal, "request data for metrics")
-    
-    Container(api, "API - Gateaway")
-    BiRel(api, analysis_internal, "uses")
-    BiRel(events_hub_server, api, "uses")
-   
-    
+
 }
  Boundary(b_ui, "User Interface"){
         
         Container(ui, "Mobile or Web application")
         Person(operator, "Operator")
-        Person(analytic, "Analytic")
         Person(vet, "Vet")
         BiRel(ui, operator, "Uses: tasks")
         BiRel(ui, vet, "Uses: health data for pigs")
-        BiRel(ui, analytic, "Uses: metrics")
-        BiRel(ui,api, "uses")
         BiRel(ui,api_local, "uses")
     
     }
