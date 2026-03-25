@@ -8,9 +8,10 @@ System_Boundary(atck_agent, "Agent "){
     Rel(video, data_hub, "events")
     Rel(video, duty_operator, "notifications")
     
-    Container(iot, "IoT sensors", "Sensors: temperature, volume, pressure, etc.")
-    Container(iot, "IoT devices", "Can execute commands (open, close, on, off and so on)")
-    Rel(iot, data_hub, "data")
+    Container(iot_sensors, "IoT sensors", "Sensors: temperature, volume, pressure, etc.")
+    Container(iot_devices, "IoT devices", "Can execute commands (open, close, on, off and so on)")
+    Rel(iot_sensors, data_hub, "data")
+    Rel(data_hub, iot_devices, "commands")
     Container(iot_auto_management, "IOT auto-manage", "Analyze data from sensors and send commands to devices")
     Rel(iot_auto_management, data_hub, "commands")
     Rel(data_hub, iot_auto_management, "data")
