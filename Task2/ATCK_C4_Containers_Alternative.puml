@@ -1,7 +1,7 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Альтернативное_Решение
 !include <C4/C4_Container>
 
-System_Boundary(atck_agent, "Agent "){
+System_Boundary(atck_agent, "Agent"){
     Person(duty_operator, "Duty Operator")
     ContainerQueue(data_hub, "Data Hub", "Store data, provide communication between containers")
     Container(video, "Video analysis", "Analyze data from cameras with AI")
@@ -58,3 +58,4 @@ System_Boundary(atck_server, "Server"){
     Rel(data_hub_server, analysis_internal, "request data for metrics")
 
 }
+@enduml
