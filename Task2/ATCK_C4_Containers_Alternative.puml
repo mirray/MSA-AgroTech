@@ -31,6 +31,16 @@ System_Boundary(atck_agent, "Agent "){
     Rel(internal_services, data_hub, "raw data")
     Container(api_local, "Local API - Gateaway")
     BiRel(events_hub, api_local, "uses")
+
+     Boundary(b_ui, "User Interface"){  
+        Container(ui, "Mobile or Web application")
+        Person(operator, "Operator")
+        Person(vet, "Vet")
+        BiRel(ui, operator, "Uses: tasks")
+        BiRel(ui, vet, "Uses: health data for pigs")
+        BiRel(ui,api_local, "uses")
+    
+    }
 }
 
 System_Boundary(atck_server, "Server"){
@@ -48,13 +58,3 @@ System_Boundary(atck_server, "Server"){
     Rel(data_hub_server, analysis_internal, "request data for metrics")
 
 }
- Boundary(b_ui, "User Interface"){
-        
-        Container(ui, "Mobile or Web application")
-        Person(operator, "Operator")
-        Person(vet, "Vet")
-        BiRel(ui, operator, "Uses: tasks")
-        BiRel(ui, vet, "Uses: health data for pigs")
-        BiRel(ui,api_local, "uses")
-    
-    }
