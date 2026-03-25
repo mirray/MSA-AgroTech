@@ -19,5 +19,5 @@ Rel(atck_agent, operator, "Получает задачи на обслужива
 Rel(atck_agent, vet, "Получает данные о животных")
 Rel(analytic, atck_server, "Управляет метриками")
 Rel(atck_server, analytic_module, "Передает данные метрик")
-Rel(atck_agent, erp, "Отправляет заявки на закупку кормов")
+Rel(atck_server, erp, "Отправляет заявки на закупку кормов")
 @enduml

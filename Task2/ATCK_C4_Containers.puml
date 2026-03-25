@@ -1,78 +1,68 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1
 !include <C4/C4_Container>
-Person(duty_operator, "Duty Operator")
 
-System_Boundary(atck_agent, "Agent"){
-    ContainerQueue(broker, "Message broker")
-    Container(video, "Video analysis")
-    Rel(video, broker, "send events")
-
-    Container(notification, "Notifications")
-    Rel(video, notification, "send notification")
-    Rel(notification, duty_operator, "Recieves notification")
+System_Boundary(atck_agent, "Agent "){
+    Person(duty_operator, "Duty Operator")
+    ContainerQueue(data_hub, "Data Hub", "Store data, provide communication between containers")
+    Container(video, "Video analysis", "Analyze data from cameras with AI")
+    Rel(video, data_hub, "events")
+    Rel(video, duty_operator, "notifications")
     
-    Container(iot, "IOT data collecting")
-    Rel(iot, broker, "sensors data", "MQTT")
-    Rel(iot, broker, "RFID data", "MQTT")
+    Container(iot, "IoT sensors", "Sensors: temperature, volume, pressure, etc.")
+    Container(iot, "IoT devices", "Can execute commands (open, close, on, off and so on)")
+    Rel(iot, data_hub, "data")
+    Container(iot_auto_management, "IOT auto-manage", "Analyze data from sensors and send commands to devices")
+    Rel(iot_auto_management, data_hub, "commands")
+    Rel(data_hub, iot_auto_management, "data")
+    Container(iot_health_check, "IOT health check", "Check if Iot sensors or devices reuqire human help (clean, replace, repair and so on)")
+    Rel(iot_health_check, data_hub, "tasks")
+    Rel(data_hub, iot_health_check, "data")
 }
 
 System_Boundary(atck_server, "Server"){
-    ContainerQueue(event_broker, "Event broker")
-    
-        ContainerQueue(broker_server, "Message broker")
-        BiRel(broker, broker_server, "sync data")
-        Container(data, "Data Lake")
-        Rel(broker_server, data, "raw data from Iot sensors")
-
-        Container(iot_management, "Manage IoT devices")
-        Rel(iot_management, data, "request data")
-        Rel(iot_management, broker_server, "commands for IoT device")
-        Rel(iot_management, event_broker, "tasks for people")     
-    
+    ContainerQueue(data_hub_server, "Raw Data Hub", "Store data")
+    BiRel(data_hub, data_hub_server, "sync data")
    
-    Boundary(internal_services, "Internal services"){
-        Container(prediction, "Prediction data service")
-        Rel(prediction, data, "request data")
-        Rel(prediction, event_broker, "commands for erp (buy food for pigs)")
-            
-        Container(pigs, "Pigs management")
-        Rel(pigs, data, "request data")
-        Rel(pigs, event_broker, "pigs data")
-        
+    Boundary(internal_services, "Management services"){
+        Container(supply, "Supply management", "Annalyses ammount fo food, and request to buy more")
+        Container(pigs, "Pigs management", "Checks pigs status and health")
+        Container(tasks, "Tasks management", "Manages tasks for operators")
+        Container(erp_sync, "ERP Sync gate", "Sync data with ERP")
+        System_Ext(erp, "ERP - system")
+        BiRel(erp, erp_sync, "sync data")
+        ContainerQueue(events_hub, "Events Hub", "Store structured data, communicate between services")
+    
     }
-    Container(tasks, "Tasks management")
-    Rel(event_broker, tasks, "get commands for people")
-    Rel(event_broker, tasks, "get results of command executions")
-    Rel(event_broker, tasks, "get people data (ERP)")
-    Rel(tasks, event_broker, "send personificated commands")
+    Rel(internal_services, data_hub_server, "raw data")
 
-    System_Ext(erp, "ERP - system")
-    Container(erp_sync, "ERP Sync gate")
-    BiRel(erp_sync, event_broker, "send ERP-data")
-    BiRel(erp, erp_sync, "Sync data")
+    Boundary(analysis_internal, "Internal Analytic Services"){
+        Container(metrics_management, "Metrics management", "Create, modify, remove metrics")
+        Container(analytic_module_sync, "Analytic Sync gate", "Send metrics data to external analytics module")   
+        System_Ext(analytic_module, "Analytic Module") 
+        Rel(analytic_module_sync, analytic_module ,"send metrics")
+        ContainerDb(analytic_db, "Analytic data storage")
+    }
+    Rel(data_hub_server, analysis_internal, "request data for metrics")
     
-    System_Ext(analytic_module, "Analytic Module")
-    
-    Container(analytic_module_sync, "Analytic Sync gate")
-    Rel(data, analytic_module_sync, "send metrics data")
-    Rel(analytic_module_sync, analytic_module ,"send metrics data")
-    
-    Container(metrics, "Manage metrics")
-    Rel(metrics, data, "create new metrics")
-    Rel(data, metrics, "request metrics data")
-
-    Container(ui, "Mobile or Web application")
-    Boundary(users,"Users" ){
+    Boundary(b_ui, "User Interface"){
+        Container(api, "API - Gateaway")
+        BiRel(api, analysis_internal, "uses")
+        BiRel(events_hub, api, "uses")
+        Container(ui, "Mobile or Web application")
         Person(operator, "Operator")
         Person(analytic, "Analytic")
         Person(vet, "Vet")
+        BiRel(ui, operator, "Uses: tasks")
+        BiRel(ui, vet, "Uses: health data for pigs")
+        BiRel(ui, analytic, "Uses: metrics")
+        BiRel(ui,api, "uses")
+    
     }
-    Rel(ui, operator, "Uses: tasks")
-    Rel(ui, vet, "Uses: health data for pigs")
-    Rel(analytic, ui, "Uses: metrics")
-    BiRel(ui, event_broker, "send/receive commands")
-    BiRel(ui, metrics, "get metrics data and manage metrics")
     
 }
-Lay_D(event_broker, internal_services)
+
+
+
+
+
 @enduml
