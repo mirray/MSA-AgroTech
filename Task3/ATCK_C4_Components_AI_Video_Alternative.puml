@@ -1,0 +1,22 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_Video_Analysis_Alternative
+!include <C4/C4_Component>
+
+ContainerQueue_Ext(data_hub, "MQTT broker")
+Person_Ext(duty_operator, "Duty Operator")
+Person_Ext(cameras, "IP-Cameras")
+Component_Ext(ai, "AI Model")
+Container_Boundary(video_b, "AI Video analysis"){
+    Component(video_service, "Events: Video analysis by AI", "OpenCV + AI")
+    Rel_U(video_service, ai, "use")
+    Rel_D(video_service, duty_operator, "Alert", "SMS")
+    Rel_D(cameras, video_service, "video stream")
+    Rel_D(video_service, data_hub, "topic: event", "MQTT")
+}
+Container_Boundary(video_identity, "Pigs Identification: Video analysis"){
+    Component(video_identity_service, "Service to Identify pigs", "OpenCV + AI")
+    Rel_U(video_identity_service, ai, "use")
+    Rel_D(cameras, video_identity_service, "video stream")
+    Rel_D(video_identity_service, data_hub, "topic: pigs data", "MQTT")
+}
+        
+@enduml
