@@ -1,4 +1,4 @@
-@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_pigs
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Pigs
 !include <C4/C4_Component>
 
 ContainerQueue_Ext(data_hub, "MQTT broker")

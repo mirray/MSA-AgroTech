@@ -1,4 +1,4 @@
-@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_VideoAnalysis
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_Video_Analysis
 !include <C4/C4_Component>
 
 ContainerQueue_Ext(data_hub, "MQTT broker")
