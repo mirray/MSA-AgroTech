@@ -1,0 +1,17 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_iot
+!include <C4/C4_Component>
+
+ContainerQueue_Ext(data_hub, "MQTT broker")
+Container_Boundary(iot_auto_management, "IOT auto-manage"){
+    Component(iot_auto_management_service, "Analyze IoT Data", "PySpark")
+    Rel_D(data_hub, iot_auto_management_service, "topic:sensors", "MQTT")
+    Rel_U(iot_auto_management_service, data_hub, "topic:commands","MQTT")
+}
+
+Container_Boundary(iot_health_check, "IOT health check"){
+    Component(iot_health_check_service, "IOT health check", "PySpark")
+    Rel_D(data_hub, iot_health_check_service, "topic:sensors","MQTT")
+    Rel_U(iot_health_check_service, data_hub, "topic:tasks","MQTT")
+}
+    
+@enduml

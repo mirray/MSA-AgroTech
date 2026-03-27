@@ -1,0 +1,45 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_analysis
+!include <C4/C4_Component>
+ContainerQueue_Ext(data_hub, "MQTT broker")
+Container_Ext(api, "API - Gateway")
+System_Ext(analytic_module, "Analytic Module") 
+Boundary(analysis_internal, "Internal Analytic Services"){
+    ContainerDb(metrics_management_db, "Metrics storage", "Store metrics configurations")
+    Container_Boundary(metrics_management, "Metrics: Api Service"){
+        Component(metrics_management_ch, "Command handler")
+        Component(metrics_management_qh, "Query handler")
+        Component(metrics_management_cache, "Cache")
+        Component(metrics_management_controller, "Rest API Controller")
+        Rel_U(metrics_management_ch, metrics_management_db, "update metrics")
+        Rel_D(metrics_management_db,metrics_management_qh, "collects metrics")
+        Rel_D(metrics_management_qh, metrics_management_cache, "cached data")
+        Rel_U(metrics_management_controller, metrics_management_qh, "send request")
+        Rel_U(metrics_management_controller, metrics_management_ch, "send command")
+        Rel_D(metrics_management_cache, metrics_management_controller, "gets data") 
+    }
+
+    Container_Boundary(analytic_module_sync, "Analytic Sync gate") {
+        Component(analytic_module_sync_collector, "Data Collector")
+    }
+    
+    Rel(analytic_module_sync_collector, analytic_module ,"aggregated data", "RestAPI, JSON")
+            
+   
+    Container_Boundary(metrics_service, "Metrics counter") {
+        Component(metrics_service_processor, "Metrics Processor") 
+        ContainerDb(analytic_db, "TimeScaleDB", "store raw data from all Iot devices")
+        Rel_D(data_hub, analytic_db, "data integration")  
+        Component(metrics_service_collector, "Data Collector")
+        Rel_D(analytic_db, metrics_service_collector,"aggregated data")  
+        ContainerDb(analytic_db_metrics, "Aggregated data storage", "store raw data from all Iot devices") 
+        Rel_D(metrics_service_collector, analytic_db_metrics, "aggregated data")                                                  
+    }                  
+    Rel_D(metrics_service_processor, analytic_db, "continuous aggregate", "CRUD")
+     Rel_D(metrics_management_db, metrics_service_processor, "metrics")
+    Rel_D(analytic_db_metrics, analytic_module_sync_collector,  "aggregated data")
+            
+}
+       
+    
+    BiRel_D(metrics_management_controller, api, "mertics", "Rest API")    
+@enduml

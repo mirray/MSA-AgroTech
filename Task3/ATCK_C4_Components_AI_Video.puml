@@ -1,0 +1,15 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_VideoAnalysis
+!include <C4/C4_Component>
+
+ContainerQueue_Ext(data_hub, "MQTT broker")
+Person_Ext(duty_operator, "Duty Operator")
+Person_Ext(cameras, "IP-Cameras")
+Component_Ext(ai, "AI Model")
+Container_Boundary(video_b, "Events: Video analysis"){
+    Component(video_service, "Service: Video analysis by AI", "OpenCV + AI")
+    Rel_L(video_service, ai, "use")
+    Rel_R(video_service, duty_operator, "Alert", "SMS")
+    Rel_D(cameras, video_service, "video stream")
+    Rel_D(video_service, data_hub, "topic: event", "MQTT")
+}
+@enduml

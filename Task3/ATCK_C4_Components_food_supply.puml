@@ -1,0 +1,21 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_food_supply
+!include <C4/C4_Component>
+
+ContainerQueue_Ext(data_hub, "MQTT broker")
+System_Ext(erp, "ERP - system")
+Container_Boundary(supply, "Supply management"){
+    Component(supply_analysis, "MQTT Consumer")
+    Component(supply_analysis_count, "Count supplies")
+    ContainerDb(supply_db, "Supply DB", "PostgreSQL")
+}
+Container_Boundary(erp_sync, "ERP Sync gate"){
+    Component(erp_sync_service, "Requests collector")
+}
+Rel_D(data_hub, supply_analysis, "topic:sensors")
+
+Rel_D(supply_analysis, supply_db, "structured data")
+Rel_L(supply_db,supply_analysis_count, "historical data", "CQRS")
+Rel_R(supply_analysis_count, supply_db, "request to purchase", "CQRS")
+Rel_D(supply_db, erp_sync_service, "Collect requests", "PQL") 
+Rel_R(erp_sync_service, erp, "send requests", "JSON, REST API")    
+@enduml
