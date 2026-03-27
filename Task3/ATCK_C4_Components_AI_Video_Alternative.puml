@@ -1,6 +1,5 @@
 @startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_Video_Analysis_Alternative
 !include <C4/C4_Component>
-
 ContainerQueue_Ext(data_hub, "MQTT broker")
 Person_Ext(duty_operator, "Duty Operator")
 Person_Ext(cameras, "IP-Cameras")
@@ -17,6 +16,5 @@ Container_Boundary(video_identity, "Pigs Identification: Video analysis"){
     Rel_U(video_identity_service, ai, "use")
     Rel_D(cameras, video_identity_service, "video stream")
     Rel_D(video_identity_service, data_hub, "topic: pigs data", "MQTT")
-}
-        
+}    
 @enduml
