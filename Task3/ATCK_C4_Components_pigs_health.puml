@@ -1,0 +1,28 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Pigs
+!include <C4/C4_Component>
+
+ContainerQueue_Ext(data_hub, "MQTT broker")
+Container_Boundary(pigs, "Pigs management"){
+    Component(pigs_analysis, "Analyze pigs health")
+    ContainerDb(pigs_db, "Pigs DB")
+    Component(pigs_analysis_qh, "Query Handler")
+    Component(pigs_analysis_ch, "Command Handler")
+    Rel_D(data_hub, pigs_db, "topic: RFID", "ETL")
+    Rel_D(data_hub, pigs_db, "topic: events", "ETL")
+
+    Rel_U(pigs_analysis, pigs_analysis_ch, "command")
+    Rel_U(pigs_analysis_ch, pigs_db, "update pigs profile")
+    Rel_U(pigs_analysis_qh, pigs_analysis, "data")   
+    Rel_U(pigs_analysis, pigs_analysis_qh, "request") 
+    Rel_D(pigs_db, pigs_analysis_qh, "combined data from rfid and events")
+}
+Container_Boundary(pigs_api, "Pigs: Api Service"){
+    Component(pigs_qh, "Query handler")
+    Rel_D(pigs_db, pigs_qh, "collects pigs profiles")
+    Component(pigs_controller, "Rest API Controller")
+    Rel_U(pigs_controller, pigs_qh, "query")
+    Rel_D(pigs_qh, pigs_controller, "data")
+    }
+Container_Ext(api, "API - Gateway")
+Rel_D(pigs_controller, api, "pigs profiles", "Rest API")    
+@enduml

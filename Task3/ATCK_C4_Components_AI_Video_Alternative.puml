@@ -1,0 +1,33 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_Video_Analysis_Alternative
+!include <C4/C4_Component>
+ContainerQueue_Ext(data_hub, "MQTT broker")
+Person_Ext(duty_operator, "Duty Operator")
+Person_Ext(cameras, "IP-Cameras")
+Component_Ext(ai, "AI Model")
+
+Container_Boundary(video_b, "Events: Video analysis"){
+    Component(video_capturing, "Video Capturer", "OpenCV", "apply normalization filters")
+    Component(video_service, "Events analysis", "OpenCV + AI")
+    Component(video_notification, "Notificator")
+    Component(video_p, "MQTT Producer")
+    Rel(video_capturing, video_service, "stream")
+    Rel_U(video_service, ai, "use")
+    Rel_R(video_service, video_notification, "Alert")
+    Rel_D(video_notification, duty_operator, "Alert", "SMS")
+    Rel_D(cameras, video_capturing, "video stream")
+    Rel_D(video_service, video_p, "event")
+    Rel_D(video_p, data_hub, "topic: event", "MQTT")
+}
+Container_Boundary(video_identity, "Pigs Identification: Video analysis"){
+    Component(video_identity_service, "Service to Identify pigs", "OpenCV + AI")
+   
+    Component(video_identity_capturing, "Video Capturer", "OpenCV", "apply normalization filters")
+    Component(video_identity_service_p, "MQTT Producer")
+        Rel(video_identity_capturing, video_identity_service, "stream")
+        Rel_U(video_identity_service, ai, "use")
+        Rel_D(cameras, video_identity_capturing, "video stream")
+        Rel_D(video_identity_service, video_identity_service_p, "event")
+        Rel_D(video_identity_service_p, data_hub, "topic: event", "MQTT")
+}
+
+@enduml

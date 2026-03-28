@@ -1,0 +1,78 @@
+@startuml SaaS_DB_Schema_Isolations
+!include <C4/C4_Container>
+
+System_Boundary(atck, "АвтоТехноСвиноКомплекс "){
+
+    ContainerQueue_Ext(data_hub1, "MQTT broker (Tenant1)", "Store data, provide communication between containers")
+    ContainerQueue_Ext(data_hub2, "MQTT broker (Tenant2)", "Store data, provide communication between containers")
+    Lay_D(data_hub1, data_hub2)
+
+    ContainerQueue(data_hub_server, "MQTT broker", "Store data from IoT devices")
+    BiRel_R(data_hub1, data_hub_server, "sync data (include tenantKey in each message)", "Unstable network")
+    BiRel_R(data_hub2, data_hub_server, "sync data (include tenantKey in each message)", "Unstable network")
+        
+    System_Ext(analytic_module1, "Analytic Module (Tenant1)") 
+    System_Ext(analytic_module2, "Analytic Module (Tenant2)") 
+    
+    System_Ext(erp1, "ERP - system (Tenant1)")
+    System_Ext(erp2, "ERP - system (Tenant2)")
+        
+    Boundary(b_pigs, "Pigs health monitoring"){
+        Container(pigs, "Pigs management", "Checks pigs status and health")
+        Rel_D(data_hub_server, pigs, "data from RFID-sensors & events")
+        ContainerDb(pigs_db, "Pigs DB", "PostgreSQL", "different schemas for each tenant")
+        BiRel_D(pigs, pigs_db, "uses", "", "check schema by tenantKey")
+        Container(pigs_api, "Pigs: Api Service")
+        Rel_D(pigs_db, pigs_api, "collects pigs profiles", "", "by tenant schema")
+    }
+    Boundary(internal_services, "Tasks management"){
+        Container(tasks, "Tasks management", "Manages tasks for operators")
+        Rel_D(data_hub_server, tasks, "tasks")
+        ContainerDb(tasks_db, "Tasks DB", "PostgreSQL", "different schemas for each tenant")
+        BiRel_D(tasks, tasks_db, "uses", "", "check schema by tenantKey")
+        Container(tasks_api, "Tasks: Api Service")
+        BiRel_D(tasks_db, tasks_api, "Manage tasks", "", "by tenant schema")       
+        
+    }
+    ContainerDb(analytic_db, "Data lake","TimescaleDB", "store raw data from all Iot devices")
+    Boundary(analysis_internal, "Internal Analytic Services"){
+            Container(metrics_management, "Metrics: Api Service", "Create, modify, remove metrics")
+            ContainerDb(metrics_management_db, "Metrics storage", "PostgreSQL", "different schemas for each tenant")
+            BiRel_U(metrics_management, metrics_management_db, "uses", "", "check schema by tenantKey")
+            Container(analytic_module_sync, "Analytic Sync gate", "Send metrics data to external analytics module")   
+
+            Rel_D(analytic_db, analytic_module_sync, "collect aggregated data by tenantKey")
+            Rel_D(analytic_module_sync, analytic_module1 ,"aggregated data by tenant")
+            Rel_D(analytic_module_sync, analytic_module2 ,"aggregated data by tenant")
+            Rel_R(data_hub_server, analytic_db, "store", "", "chose schema by tenantKey")
+            Container(metrics_manager, "Metrics manager", "Creates aggregated views") 
+            Rel_D(metrics_manager, analytic_db, "aggregated views", "CRUD", "by tenant")
+            Rel_D(metrics_manager, metrics_management_db, "requests metrics", "", "by tenat")                
+    }
+    Boundary(b_supply, "Food Supply"){
+            Container(supply, "Supply management", "Analyzes amount of food, and request to buy more")
+            Rel_D(data_hub_server, supply, "data from feeders sensors")
+            ContainerDb(supply_db, "Supply DB", "PostgreSQL", "different schemas for each tenant")
+            BiRel_D(supply, supply_db, "uses", "", "check schema by tenantKey")
+            Container(erp_sync, "ERP Sync gate", "Sync data with ERP")
+            Rel_D(supply_db, erp_sync, "Collect requests", "", "by tenant Schema")  
+            
+            Rel_D(erp_sync, erp1, "send requests")
+            Rel_D(erp_sync, erp2, "send requests")
+        }
+    Container(api, "API - Gateway", "Authentification + Authorization, Redis cache")       
+    BiRel_D(tasks_api, api, "uses")
+    BiRel_D(pigs_api, api, "uses")
+    BiRel_D(metrics_management, api, "uses")
+    Boundary(ui_b, "User interface"){       
+        Container(ui, "Mobile or Web application")
+        Person(operator, "Operator")
+        Person(analytic, "Analytic")
+        Person(vet, "Vet")
+        BiRel_D(ui, operator, "Uses: tasks")
+        BiRel_D(ui, vet, "Uses: health data for pigs")
+        BiRel_D(ui, analytic, "Uses: metrics")
+        BiRel_D(api,ui, "uses")
+    } 
+}
+@enduml

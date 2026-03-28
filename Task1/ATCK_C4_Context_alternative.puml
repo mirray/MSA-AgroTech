@@ -1,0 +1,27 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Альтернативное_Решение
+!include  <C4/C4_Context>
+
+Person(duty_operator, "Дежурный оператор", "Находится на свиноферме")
+Person(analytic, "Аналитик", "Может создавать новые метрики, анализирует данные")
+Person(operator, "Оператор", "Обслуживает устройства свинофермы")
+Person(vet, "Ветеринар", "Проверяет состояние свиней")
+
+System(atck, "АвтоТехноСвиноКомплекс")
+System_Ext(analytic_module, "Аналитический модуль")
+System_Ext(erp, "ERP - система")
+
+System_Ext(cameras, "Видеокамеры")
+System_Ext(iot_sensors, "Сенсоры", "Сенсоры кормушек и поилок, сенсоры фильтров воды")
+System_Ext(iot_devices, "Автоматизированные Кормушки и поилки")
+
+Rel_D(cameras, atck, "Видео")
+Rel_D(iot_sensors, atck, "Данные с датчиков")
+Rel_L(atck, iot_devices, "Команды на устройства")
+Rel_D(atck, duty_operator, "Получает уведомления о поведении животных")
+Rel_D(atck, operator, "Получает задачи на обслуживание")
+Rel_D(atck, vet, "Получает данные о животных")
+Rel_L(analytic, atck, "Управляет метриками, получает аналитику")
+Rel(atck, analytic_module, "Передает данные метрик")
+Rel(atck, erp, "Отправляет заявки на закупку кормов")
+
+@enduml

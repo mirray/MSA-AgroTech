@@ -1,0 +1,40 @@
+@startuml Video_Analysis_Code 
+!include <C4/C4_Component>
+class VideoSystem {
+        + aiModel
+        + IDetector
+        + analyze(n_video)
+    }
+interface ICamera {
+        + video streamVideo()
+    }
+interface ICapturer {
+        + Normalize(video)
+}
+interface IDetector {
+        + IProducer
+        + detect(video, aiModel)
+}
+class EventDetector {
+        + detectEvent(video)
+    }
+
+interface IProducer {
+        + write(message, topic)
+}
+
+
+class Notifier {
+        + write(event)
+    }
+
+    ICamera --> ICapturer : streams video
+    ICapturer --> VideoSystem : normalized video (n_video)
+    VideoSystem --> IDetector : sent video
+    IDetector --> IProducer : passes message
+    EventDetector --> Notifier : passes event notification
+
+    EventDetector --> IDetector : implements
+
+
+@enduml

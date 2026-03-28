@@ -1,0 +1,19 @@
+@startuml Saas_Api
+!include <C4/C4_Context>
+
+Person(analytic, "Analytic")
+Person(operator, "Оператор", "Обслуживает устройства свинофермы")
+Person(vet, "Ветеринар", "Проверяет состояние свиней")
+Person(director, "Director")
+System(atck, "Saas API")
+System_Ext(analytic_module, "Аналитический модуль")
+System_Ext(erp, "ERP - система")
+
+Rel_D(director, atck, "Make payment")
+Rel_D(atck, operator, "Manage tasks")
+Rel_D(atck, vet, "Receives pigs data")
+BiRel_D(analytic, atck, "Manage metrics")
+Rel(atck, analytic_module, "Sync analytic data")
+Rel(atck, erp, "sync to erp")
+
+@enduml

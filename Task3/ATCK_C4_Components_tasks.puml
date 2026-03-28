@@ -1,0 +1,21 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Tasks
+!include <C4/C4_Component>
+ContainerQueue_Ext(data_hub, "MQTT broker")
+Boundary(internal_services, "Tasks management"){
+        ContainerDb(tasks_db, "Tasks DB")
+        Rel_D(data_hub , tasks_db,"topic: tasks", "ETL")
+        ContainerDb(tasks_db, "Tasks DB")
+        Container_Boundary(tasks_api, "Tasks: Api Service"){
+            Component(tasks_qh, "Query handler")
+            Rel_D(tasks_db, tasks_qh, "collects tasks")
+            Component(tasks_ch, "Command handler")
+            Rel_U(tasks_ch, tasks_db, "update task status")
+            Component(tasks_controller, "Rest API Controller")
+            Rel_U(tasks_controller, tasks_qh, "Send request")
+            Rel_U(tasks_controller, tasks_ch, "Send command")
+            Rel_D(tasks_qh, tasks_controller, "get data")
+        }       
+    }
+    Container_Ext(api, "API - Gateway")
+    BiRel_D(tasks_controller, api, "tasks", "Rest API")    
+@enduml

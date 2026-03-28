@@ -1,0 +1,51 @@
+@startuml Analysis_Code
+!include <C4/C4_Component>
+
+interface ICommandHandler {
+   + handle(command)
+}
+interface IQueryHandler {
+   + data handle(query)
+}
+class MetricsProcessor {
+    + ICommandHandler
+    + IQueryHandler
+    + command(CreateAggrView)
+    + command(EditAggrView)
+    + command(DeleteAggrView)
+    + query(CollectChangedMetrics)
+    + command(updateMetricStatus)
+    + sync()
+}
+class DataCollector { 
+    + IQueryHandler
+    + IDataMapper
+    + query(CollectAggregatedData)
+}
+interface IDataMapper {
+    + Map(aggragatedData)
+}
+interface ISyncGate {
+    + IDataMapper
+    + send(mappedData) 
+}
+
+class RestApiController {
+    + ICommandHandler
+    + IQueryHandler
+    + command(CreateMetric)
+    + command(EditMetric)
+    + command(DeleteMetric)
+    + query(ViewAllMetrics)
+}
+
+MetricsProcessor --> ICommandHandler : send command
+MetricsProcessor --> IQueryHandler : send query
+
+DataCollector --> IQueryHandler : send query
+DataCollector --> IDataMapper :  map data to correct format 
+DataCollector --> ISyncGate : send data to sync
+
+RestApiController --> ICommandHandler : send command
+RestApiController --> IQueryHandler : send query
+@enduml

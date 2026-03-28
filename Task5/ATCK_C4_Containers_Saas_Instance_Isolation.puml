@@ -1,0 +1,120 @@
+@startuml SaaS_Instance_Isolations
+!include <C4/C4_Container>
+
+System_Boundary(atck, "АвтоТехноСвиноКомплекс "){
+
+    ContainerQueue_Ext(data_hub1, "MQTT broker (Tenant1)", "Store data, provide communication between containers")
+    ContainerQueue_Ext(data_hub2, "MQTT broker (Tenant2)", "Store data, provide communication between containers")
+    Lay_D(data_hub1, data_hub2)
+
+    ContainerQueue(data_hub_server, "MQTT broker", "Store data from IoT devices")
+    BiRel_R(data_hub1, data_hub_server, "sync data (include tenantKey in each message)", "Unstable network")
+    BiRel_R(data_hub2, data_hub_server, "sync data (include tenantKey in each message)", "Unstable network")
+        
+    System_Ext(analytic_module1, "Analytic Module (Tenant1)") 
+    System_Ext(analytic_module2, "Analytic Module (Tenant2)") 
+    
+    System_Ext(erp1, "ERP - system (Tenant1)")
+    System_Ext(erp2, "ERP - system (Tenant2)")
+        
+    Boundary(b_pigs, "Pigs health monitoring (Tenant1)"){
+        Container(pigs, "Pigs management", "Checks pigs status and health")
+        Rel_D(data_hub_server, pigs, "data from RFID-sensors & events")
+        ContainerDb(pigs_db1, "Pigs DB", "PostgreSQL")
+        BiRel_D(pigs, pigs_db1, "uses")
+        Container(pigs_api, "Pigs: Api Service")
+        Rel_D(pigs_db1, pigs_api, "collects pigs profiles")
+    }
+     Boundary(b_pigs2, "Pigs health monitoring (Tenant2)"){
+            Container(pigs2, "Pigs management", "Checks pigs status and health")
+            Rel_D(data_hub_server, pigs2, "data from RFID-sensors & events")
+            ContainerDb(pigs_db2, "Pigs DB", "PostgreSQL")
+            BiRel_D(pigs2, pigs_db2, "uses")
+            Container(pigs_api2, "Pigs: Api Service")
+            Rel_D(pigs_db2, pigs_api2, "collects pigs profiles")
+        }
+    Boundary(internal_services, "Tasks management (Tenant1)"){
+        Container(tasks, "Tasks management", "Manages tasks for operators")
+        Rel_D(data_hub_server, tasks, "tasks")
+        ContainerDb(tasks_db1, "Tasks DB", "PostgreSQL")
+        BiRel_D(tasks, tasks_db1, "uses")
+        Container(tasks_api, "Tasks: Api Service")
+        BiRel_D(tasks_db1, tasks_api, "Manage tasks")       
+    }
+    Boundary(internal_services2, "Tasks management (Tenant2)"){
+            Container(tasks2, "Tasks management", "Manages tasks for operators")
+            Rel_D(data_hub_server, tasks2, "tasks")
+            ContainerDb(tasks_db2, "Tasks DB", "PostgreSQL")
+            BiRel_D(tasks2, tasks_db2, "uses")
+            Container(tasks_api2, "Tasks: Api Service")
+            BiRel_D(tasks_db2, tasks_api2, "Manage tasks")       
+        }
+    ContainerDb(analytic_db1, "Data lake (Tenant1)","TimescaleDB", "store raw data from all Iot devices")
+    ContainerDb(analytic_db2, "Data lake (Tenant2)","TimescaleDB", "store raw data from all Iot devices")
+    
+    Boundary(analysis_internal, "Internal Analytic Services (Tenant1)"){
+            Container(metrics_management, "Metrics: Api Service", "Create, modify, remove metrics")
+            ContainerDb(metrics_management_db1, "Metrics storage", "PostgreSQL")
+            BiRel_U(metrics_management, metrics_management_db1, "uses")
+            Container(analytic_module_sync, "Analytic Sync gate", "Send metrics data to external analytics module")   
+
+            Rel_D(analytic_db1, analytic_module_sync, "collect aggregated data")
+            Rel_D(analytic_module_sync, analytic_module1 ,"aggregated data")
+            Rel_R(data_hub_server, analytic_db1, "store")
+
+            Container(metrics_manager, "Metrics manager", "Creates aggregated views") 
+            Rel_D(metrics_manager, analytic_db1, "aggregated views", "CRUD")
+            Rel_D(metrics_manager, metrics_management_db1, "requests metrics")               
+    }
+    Boundary(analysis_internal2, "Internal Analytic Services (Tenant2)"){
+                Container(metrics_management2, "Metrics: Api Service", "Create, modify, remove metrics")
+                ContainerDb(metrics_management_db2, "Metrics storage", "PostgreSQL")
+                BiRel_U(metrics_management2, metrics_management_db2, "uses")
+                Container(analytic_module_sync2, "Analytic Sync gate", "Send metrics data to external analytics module")   
+                Rel_D(analytic_db2, analytic_module_sync2, "collect aggregated data")
+                Rel_D(analytic_module_sync2, analytic_module2 ,"aggregated data")
+                Rel_R(data_hub_server, analytic_db2, "store")
+                Container(metrics_manager2, "Metrics manager", "Creates aggregated views") 
+                Rel_D(metrics_manager2, analytic_db2, "aggregated views", "CRUD")
+                Rel_D(metrics_manager2, metrics_management_db2, "requests metrics")               
+        }
+    Boundary(b_supply, "Food Supply (Tenant1)"){
+            Container(supply, "Supply management", "Analyzes amount of food, and request to buy more")
+            Rel_D(data_hub_server, supply, "data from feeders sensors")
+            ContainerDb(supply_db, "Supply DB", "PostgreSQL")
+            BiRel_D(supply, supply_db, "uses")
+            Container(erp_sync, "ERP Sync gate", "Sync data with ERP")
+            Rel_D(supply_db, erp_sync, "Collect requests")  
+            
+            Rel_D(erp_sync, erp1, "send requests")
+
+        }
+    Boundary(b_supply2, "Food Supply (Tenat2)"){
+                    Container(supply2, "Supply management", "Analyzes amount of food, and request to buy more")
+                    Rel_D(data_hub_server, supply2, "data from feeders sensors")
+                    ContainerDb(supply_db2, "Supply DB", "PostgreSQL")
+                    BiRel_D(supply2, supply_db2, "uses")
+                    Container(erp_sync2, "ERP Sync gate", "Sync data with ERP")
+                    Rel_D(supply_db2, erp_sync2, "Collect requests")  
+
+                    Rel_D(erp_sync2, erp2, "send requests")
+                }
+    Container(api, "API - Gateway", "Authentification + Authorization, Redis cache")       
+    BiRel_D(tasks_api, api, "uses")
+    BiRel_D(tasks_api2, api, "uses")
+    BiRel_D(pigs_api, api, "uses")
+    BiRel_D(pigs_api2, api, "uses")
+    BiRel_D(metrics_management, api, "uses")
+    BiRel_D(metrics_management2, api, "uses")
+    Boundary(ui_b, "User interface"){       
+        Container(ui, "Mobile or Web application")
+        Person(operator, "Operator")
+        Person(analytic, "Analytic")
+        Person(vet, "Vet")
+        BiRel_D(ui, operator, "Uses: tasks")
+        BiRel_D(ui, vet, "Uses: health data for pigs")
+        BiRel_D(ui, analytic, "Uses: metrics")
+        BiRel_D(api,ui, "uses")
+    } 
+}
+@enduml
