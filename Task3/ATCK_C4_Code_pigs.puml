@@ -17,7 +17,8 @@ class PigsHealthProfiler {
 class ApiController { 
     + IQueryHandler
     + IDataMapper
-    + query(CollectPigsProfiles)
+    - query(CollectPigsProfiles)
+    + viewPigs()
 }
 interface IDataMapper {
     + Map(pigsProfile)
