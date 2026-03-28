@@ -1,4 +1,4 @@
-@startuml Analysis
+@startuml Pigs_Code
 !include <C4/C4_Component>
 
 interface ICommandHandler {

@@ -1,4 +1,4 @@
-@startuml Analysis
+@startuml Food_Supply_Code
 !include <C4/C4_Component>
 
 interface ICommandHandler {
