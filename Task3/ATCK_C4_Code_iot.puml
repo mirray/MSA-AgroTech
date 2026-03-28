@@ -1,4 +1,4 @@
-@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_Video_Analysis_Code 
+@startuml Iot_Code 
 !include <C4/C4_Component>
 interface IConsumer {
    + consume(topic)

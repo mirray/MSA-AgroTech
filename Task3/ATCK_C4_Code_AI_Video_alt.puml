@@ -1,4 +1,4 @@
-@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_Video_Analysis_Code_Alt 
+@startuml Video_Analysis_Code_Alt 
 !include <C4/C4_Component>
 class VideoSystem {
         + ICamera[] camera
