@@ -26,9 +26,9 @@
 Решено: использовать изоляцию на уровне инстансов
 
 Биллинг и монетизация:
-![Saas__Billing.png](Saas__Billing.png)
+![Saas_Billing_.png](Saas_Billing_.png)
 API для Saas клиентов:
-![Saas__Api.png](Saas__Api.png)
+![Saas_Api.png](Saas_Api.png)
 
 **Создание документации к API**
 
@@ -61,8 +61,12 @@ Rapidoc:
 
 To-be:
 
+![Saas_ToBe_Context_.png](Saas_ToBe_Context_.png)
+![Saas_ToBe_.png](Saas_ToBe_.png)
+
 Пример интеграции:
 
+![agrotech_atck_integration.png](agrotech_atck_integration.png)
 
 ### <a name="_bjrr7veeh80c"></a>**Альтернативы**
 
