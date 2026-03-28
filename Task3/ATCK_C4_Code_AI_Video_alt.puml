@@ -1,0 +1,44 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_Video_Analysis_Code_Alt 
+!include <C4/C4_Component>
+class VideoSystem {
+        + ICamera[] camera
+        + aiModel
+        + IDetector
+        + run()
+        + stop()
+    }
+interface ICamera {
+        + video streamVideo()
+    }
+interface IDetector {
+        + IProducer
+        + detect(video, aiModel)
+}
+class EventDetector {
+        + detectEvent(video)
+    }
+class PigsDetector {
+        + detectPig(video)
+    }
+interface IProducer {
+        + write(message)
+}
+class EventProducer {
+        + write(event)
+    }
+class PigsProducer {
+        + write(pigState)
+    }
+class Notifier {
+        + write(event)
+    }
+
+    ICamera --> VideoSystem : streams video
+    VideoSystem --> IDetector : sent video
+    IDetector --> IProducer : passes message
+    EventDetector --> Notifier : passes event notification
+    PigsDetector --> IDetector : implements
+    EventDetector --> IDetector : implements
+    EventProducer --> IProducer : implements
+    PigsProducer --> IProducer : implements
+@enduml
