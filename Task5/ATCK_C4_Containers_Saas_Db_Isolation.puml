@@ -1,4 +1,4 @@
-@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_SaaS_DB_Isolations
+@startuml SaaS_DB_Isolations
 !include <C4/C4_Container>
 
 System_Boundary(atck, "АвтоТехноСвиноКомплекс "){
