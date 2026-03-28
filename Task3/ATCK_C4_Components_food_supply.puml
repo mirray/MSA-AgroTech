@@ -4,18 +4,24 @@
 ContainerQueue_Ext(data_hub, "MQTT broker")
 System_Ext(erp, "ERP - system")
 Container_Boundary(supply, "Supply management"){
-    Component(supply_analysis, "MQTT Consumer")
     Component(supply_analysis_count, "Count supplies")
+    Component(supply_analysis_count_qh, "Query Handler")
+    Component(supply_analysis_count_ch, "Command Handler")
     ContainerDb(supply_db, "Supply DB", "PostgreSQL")
+    Rel_D(data_hub, supply_db, "topic:sensors", "ETL")
+    Rel_L(supply_analysis_count,supply_analysis_count_qh, "query")
+    Rel_R(supply_analysis_count_qh,supply_analysis_count, "data")
+    Rel(supply_db, supply_analysis_count_qh, "food consumption data")
+    Rel_U(supply_analysis_count, supply_analysis_count_ch, "request to purchase")
+    Rel_L(supply_analysis_count_ch, supply_db, "command")
 }
 Container_Boundary(erp_sync, "ERP Sync gate"){
-    Component(erp_sync_service, "Requests collector")
+    Component(erp_sync_service_qh, "Query Handler")
+    Component(erp_sync_service, "Data collector")
+    Rel_D(supply_db, erp_sync_service_qh, "Collect requests")
+    Rel_D(erp_sync_service_qh, erp_sync_service, "data")
+    Rel_U(erp_sync_service, erp_sync_service_qh, "request")
 }
-Rel_D(data_hub, supply_analysis, "topic:sensors")
-
-Rel_D(supply_analysis, supply_db, "structured data")
-Rel_L(supply_db,supply_analysis_count, "historical data", "CQRS")
-Rel_R(supply_analysis_count, supply_db, "request to purchase", "CQRS")
-Rel_D(supply_db, erp_sync_service, "Collect requests", "PQL") 
-Rel_R(erp_sync_service, erp, "send requests", "JSON, REST API")    
+ 
+Rel_D(erp_sync_service, erp, "send requests", "JSON, REST API")    
 @enduml
