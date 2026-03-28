@@ -10,35 +10,32 @@ class VideoSystem {
 interface ICamera {
         + video streamVideo()
     }
+interface ICapturer {
+            + Normalize(video)
+    }
 interface IDetector {
         + IProducer
         + detect(video, aiModel)
 }
 class EventDetector {
+        + Notifier
         + detectEvent(video)
     }
 class PigsDetector {
         + detectPig(video)
     }
 interface IProducer {
-        + write(message)
+        + write(message, topic)
 }
-class EventProducer {
-        + write(event)
-    }
-class PigsProducer {
-        + write(pigState)
-    }
 class Notifier {
-        + write(event)
+        + alert(event)
     }
-
-    ICamera --> VideoSystem : streams video
+    ICamera --> ICapturer : streams video
+    ICapturer --> VideoSystem : normalized video
     VideoSystem --> IDetector : sent video
     IDetector --> IProducer : passes message
     EventDetector --> Notifier : passes event notification
     PigsDetector --> IDetector : implements
     EventDetector --> IDetector : implements
-    EventProducer --> IProducer : implements
-    PigsProducer --> IProducer : implements
+
 @enduml

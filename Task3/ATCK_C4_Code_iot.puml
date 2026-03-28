@@ -1,0 +1,41 @@
+@startuml Архитектура_АвтоТехноСвиноКомплекс_v1_Events_Video_Analysis_Code 
+!include <C4/C4_Component>
+interface IConsumer {
+   + consume(topic)
+}
+interface IProducer {
+   + write(message, topic)
+}
+interface IIotAnalyzingSystem {
+    + IConsumer
+    + IProducer
+    + analyze(message)
+}
+interface IRule {
+   + analyze(message)
+}
+class HealthCheckFeeder {
+    + analyze(message)
+}
+class HealthCheckWater {
+    + analyze(message)
+}
+class HealthCheckFilter {
+    + analyze(message)
+}
+class AutoManageFeeder {
+    + analyze(message)
+}
+class AutoManageWater {
+    + analyze(message)
+}
+IConsumer <-- IIotAnalyzingSystem : consume message
+IIotAnalyzingSystem <--> IRule : check message
+IIotAnalyzingSystem --> IProducer : produce message
+
+HealthCheckFilter --> IIotAnalyzingSystem : implements
+HealthCheckWater --> IIotAnalyzingSystem : implements
+HealthCheckFeeder --> IIotAnalyzingSystem : implements
+AutoManageFeeder --> IIotAnalyzingSystem : implements
+AutoManageWater --> IIotAnalyzingSystem : implements
+@enduml

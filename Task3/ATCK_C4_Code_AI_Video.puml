@@ -20,11 +20,9 @@ class EventDetector {
     }
 
 interface IProducer {
-        + write(message)
+        + write(message, topic)
 }
-class EventProducer {
-        + write(event)
-    }
+
 
 class Notifier {
         + write(event)
@@ -37,6 +35,6 @@ class Notifier {
     EventDetector --> Notifier : passes event notification
 
     EventDetector --> IDetector : implements
-    EventProducer --> IProducer : implements
+
 
 @enduml
