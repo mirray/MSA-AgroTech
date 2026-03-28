@@ -1,4 +1,4 @@
-@startuml Saas_Billing
+@startuml Saas__Billing
 !include <C4/C4_Container>
 
 System_Boundary(atck, "АвтоТехноСвиноКомплекс "){
