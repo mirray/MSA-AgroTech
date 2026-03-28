@@ -1,0 +1,32 @@
+@startuml Analysis
+!include <C4/C4_Component>
+
+interface ICommandHandler {
+   + handle(command)
+}
+interface IQueryHandler {
+   + data handle(query)
+}
+class PigsHealthProfiler {
+    + ICommandHandler
+    + IQueryHandler
+    + command(UpdatePigProfile)
+    + query(CollectPigsActions)
+    + analyse()
+}
+class ApiController { 
+    + IQueryHandler
+    + IDataMapper
+    + query(CollectPigsProfiles)
+}
+interface IDataMapper {
+    + Map(pigsProfile)
+}
+
+PigsHealthProfiler --> ICommandHandler : send command
+PigsHealthProfiler --> IQueryHandler : send query
+
+ApiController --> IQueryHandler : send query
+ApiController --> IDataMapper :  map data to correct format 
+
+@enduml
