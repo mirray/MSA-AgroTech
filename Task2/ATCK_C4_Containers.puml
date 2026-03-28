@@ -69,7 +69,7 @@ System_Boundary(atck, "АвтоТехноСвиноКомплекс "){
             System_Ext(erp, "ERP - system")
             Rel_R(erp_sync, erp, "send requests")
         }
-    Container(api, "API - Gateway")       
+    Container(api, "API - Gateway", "Authentification + Authorization, Redis cache")       
     BiRel_D(tasks_api, api, "uses")
     BiRel_D(pigs_api, api, "uses")
     BiRel_D(metrics_management, api, "uses")
